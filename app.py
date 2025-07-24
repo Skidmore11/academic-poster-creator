@@ -338,7 +338,13 @@ Given the following research manuscript text, extract content for an academic A0
             if not OPENAI_API_KEY:
                 return None, "OpenAI API key not configured"
             
-            client = openai.OpenAI(api_key=OPENAI_API_KEY)
+            print(f"🔧 Creating OpenAI client...")
+            try:
+                client = openai.OpenAI(api_key=OPENAI_API_KEY)
+                print(f"✅ OpenAI client created successfully")
+            except Exception as e:
+                print(f"❌ Error creating OpenAI client: {e}")
+                return None, f"Error creating OpenAI client: {e}"
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -353,7 +359,13 @@ Given the following research manuscript text, extract content for an academic A0
             if not ANTHROPIC_API_KEY:
                 return None, "Anthropic API key not configured"
             
-            client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+            print(f"🔧 Creating Anthropic client...")
+            try:
+                client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+                print(f"✅ Anthropic client created successfully")
+            except Exception as e:
+                print(f"❌ Error creating Anthropic client: {e}")
+                return None, f"Error creating Anthropic client: {e}"
             response = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=4000,
@@ -1930,7 +1942,19 @@ if __name__ == '__main__':
     print(f"🔧 Default API provider: {current_api_provider.upper()}")
     print(f"🔧 Anthropic version: {anthropic.__version__}")
     print(f"🔧 Environment check - OpenAI key: {'✅ Set' if OPENAI_API_KEY else '❌ Missing'}")
+    if OPENAI_API_KEY:
+        print(f"🔧 OpenAI key starts with: {OPENAI_API_KEY[:10]}...")
     print(f"🔧 Environment check - Anthropic key: {'✅ Set' if ANTHROPIC_API_KEY else '❌ Missing'}")
+    if ANTHROPIC_API_KEY:
+        print(f"🔧 Anthropic key starts with: {ANTHROPIC_API_KEY[:10]}...")
+    
+    # Check for proxy-related environment variables that might cause issues
+    proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']
+    for var in proxy_vars:
+        if os.getenv(var):
+            print(f"⚠️ Found proxy environment variable: {var}={os.getenv(var)}")
+        else:
+            print(f"✅ No proxy variable: {var}")
     
     # Clean up old files on startup if auto-cleanup is enabled
     if AUTO_CLEANUP_UPLOADS:
