@@ -374,7 +374,7 @@ Given the following research manuscript text, extract content for an academic A0
                 
                 try:
                     # Create client with minimal environment
-                    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+                    openai.api_key = OPENAI_API_KEY
                     print(f"✅ OpenAI client created successfully")
                 finally:
                     # Restore original environment
@@ -389,8 +389,8 @@ Given the following research manuscript text, extract content for an academic A0
                 print(f"🔧 Error type: {type(e)}")
                 print(f"🔧 Error args: {e.args}")
                 return None, f"Error creating OpenAI client: {e}"
-            response = client.chat.completions.create(
-                model="gpt-4o",
+            response = openai.ChatCompletion.create(
+                model="gpt-4",
                 messages=[
                     {"role": "system", "content": "You are an expert in academic writing and research poster design."},
                     {"role": "user", "content": prompt}
@@ -440,7 +440,7 @@ Given the following research manuscript text, extract content for an academic A0
                 
                 try:
                     # Create client with minimal environment
-                    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+                    anthropic.api_key = ANTHROPIC_API_KEY
                     print(f"✅ Anthropic client created successfully")
                 finally:
                     # Restore original environment
@@ -455,8 +455,8 @@ Given the following research manuscript text, extract content for an academic A0
                 print(f"🔧 Error type: {type(e)}")
                 print(f"🔧 Error args: {e.args}")
                 return None, f"Error creating Anthropic client: {e}"
-            response = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+            response = anthropic.Client().messages.create(
+                model="claude-3-sonnet-20240229",
                 max_tokens=4000,
                 temperature=0.4,
                 system="You are an expert in academic writing and research poster design.",
