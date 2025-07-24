@@ -340,8 +340,27 @@ Given the following research manuscript text, extract content for an academic A0
             
             print(f"🔧 Creating OpenAI client...")
             try:
-                client = openai.OpenAI(api_key=OPENAI_API_KEY)
-                print(f"✅ OpenAI client created successfully")
+                # Clear any proxy environment variables that might interfere
+                import os
+                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']
+                original_proxy_values = {}
+                
+                # Store original values and clear them temporarily
+                for var in proxy_vars:
+                    if var in os.environ:
+                        original_proxy_values[var] = os.environ[var]
+                        del os.environ[var]
+                        print(f"🔧 Temporarily cleared proxy variable: {var}")
+                
+                try:
+                    client = openai.OpenAI(api_key=OPENAI_API_KEY)
+                    print(f"✅ OpenAI client created successfully")
+                finally:
+                    # Restore original proxy values
+                    for var, value in original_proxy_values.items():
+                        os.environ[var] = value
+                        print(f"🔧 Restored proxy variable: {var}")
+                        
             except Exception as e:
                 print(f"❌ Error creating OpenAI client: {e}")
                 return None, f"Error creating OpenAI client: {e}"
@@ -361,8 +380,27 @@ Given the following research manuscript text, extract content for an academic A0
             
             print(f"🔧 Creating Anthropic client...")
             try:
-                client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-                print(f"✅ Anthropic client created successfully")
+                # Clear any proxy environment variables that might interfere
+                import os
+                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']
+                original_proxy_values = {}
+                
+                # Store original values and clear them temporarily
+                for var in proxy_vars:
+                    if var in os.environ:
+                        original_proxy_values[var] = os.environ[var]
+                        del os.environ[var]
+                        print(f"🔧 Temporarily cleared proxy variable: {var}")
+                
+                try:
+                    client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+                    print(f"✅ Anthropic client created successfully")
+                finally:
+                    # Restore original proxy values
+                    for var, value in original_proxy_values.items():
+                        os.environ[var] = value
+                        print(f"🔧 Restored proxy variable: {var}")
+                        
             except Exception as e:
                 print(f"❌ Error creating Anthropic client: {e}")
                 return None, f"Error creating Anthropic client: {e}"
