@@ -1928,6 +1928,7 @@ if __name__ == '__main__':
         print("❌ Anthropic API key not configured")
     
     print(f"🔧 Default API provider: {current_api_provider.upper()}")
+    print(f"🔧 Anthropic version: {anthropic.__version__}")
     
     # Clean up old files on startup if auto-cleanup is enabled
     if AUTO_CLEANUP_UPLOADS:
