@@ -2676,8 +2676,6 @@
 
     <!-- Modern Landing Page -->
     <div id="landingPage" class="landing-page">
-        <!-- Global Alert Container - Top of Page -->
-        <div id="alertContainer" style="position: fixed; top: 0; left: 0; right: 0; z-index: 99999; padding: 1rem; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); box-shadow: 0 2px 10px rgba(0,0,0,0.3);"></div>
         <!-- Hero Section -->
         <section class="landing-hero">
             <div class="hero-content">
@@ -3247,6 +3245,8 @@
                 </button>
             </form>
 
+                <!-- Alerts -->
+                <div id="alertContainer"></div>
             </div>
         </div>
     </div>
@@ -4589,7 +4589,6 @@
                 }
             }, 100);
             
-            // Send request with longer timeout
             // Send request
             fetch('/upload', {
                 method: 'POST',

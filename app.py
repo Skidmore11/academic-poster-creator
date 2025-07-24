@@ -11,7 +11,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from werkzeug.utils import secure_filename
 import pdfplumber  # PDF text extraction
 import openai
-import anthropic
 from pptx import Presentation
 from pptx.util import Pt, Inches
 from pptx.dml.color import RGBColor
@@ -44,6 +43,13 @@ current_api_provider = DEFAULT_API_PROVIDER
 # Validate API keys (at least one must be set)
 if not OPENAI_API_KEY and not ANTHROPIC_API_KEY:
     raise ValueError("At least one API key must be set. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in your .env file.")
+
+# Validate API key formats
+if OPENAI_API_KEY and not OPENAI_API_KEY.startswith('sk-'):
+    print(f"⚠️ Warning: OpenAI API key doesn't start with 'sk-': {OPENAI_API_KEY[:10]}...")
+
+if ANTHROPIC_API_KEY and not ANTHROPIC_API_KEY.startswith('sk-ant-'):
+    print(f"⚠️ Warning: Anthropic API key doesn't start with 'sk-ant-': {ANTHROPIC_API_KEY[:10]}...")
 
 # 📁 File Settings
 UPLOAD_FOLDER = 'uploads'
@@ -279,57 +285,49 @@ def call_ai_api(manuscript_text, provider='openai'):
         provider = current_api_provider
     
     print(f"🤖 Using {provider.upper()} API for content extraction...")
+    print(f"🔧 Provider: {provider}")
+    print(f"🔧 Manuscript text length: {len(manuscript_text)} characters")
+    print(f"🔧 Manuscript text preview: {manuscript_text[:200]}...")
+    
+    # Truncate text if it's too long (rough estimate: 1 token ≈ 4 characters)
+    # Using larger limits for full PDF processing
+    max_chars = 150000  # Increased for full PDF processing
+    if len(manuscript_text) > max_chars:
+        print(f"⚠️ Text too long ({len(manuscript_text)} chars), truncating to {max_chars} chars")
+        # Try to truncate at a sentence boundary if possible
+        truncated = manuscript_text[:max_chars]
+        last_period = truncated.rfind('.')
+        last_exclamation = truncated.rfind('!')
+        last_question = truncated.rfind('?')
+        last_sentence_end = max(last_period, last_exclamation, last_question)
+        
+        if last_sentence_end > max_chars * 0.8:  # If we can find a sentence end in the last 20%
+            manuscript_text = manuscript_text[:last_sentence_end + 1] + "\n\n[Text truncated due to length]"
+        else:
+            manuscript_text = truncated + "\n\n[Text truncated due to length]"
+        print(f"🔧 Truncated text length: {len(manuscript_text)} characters")
     
     # Common prompt for all APIs
     prompt = f"""
-You are an expert in academic writing and research poster design.
+Extract content for an academic A0-size research poster from this manuscript text. Return ONLY a valid JSON object with these exact keys:
 
-Given the following research manuscript text, extract content for an academic A0-size research poster. 
-
-**Instructions:**
-- Return your answer as a single, valid JSON object (not Python, not markdown, not prose).
-- Use only double quotes for all keys and values.
-- Do not include any introductory or closing text, explanations, or markdown formatting.
-- Each value should be a single line (no line breaks inside values).
-- If a value is missing, use an empty string.
-- Do not include any keys other than those listed below.
-- **CRITICAL: Include COMPLETE author lists and affiliations - DO NOT use "et al" or "(see manuscript for full list)".**
-- **CRITICAL: Count words carefully and stick to the exact word count ranges specified for each field.**
-- **Word count includes all words, including articles (a, an, the) and prepositions.**
-- **If a field is too short, expand it with more detail. If too long, condense it while keeping key information.**
-
-**JSON keys and requirements:**
-- "headline": A short, punchy phrase (3-8 words) summarizing the main finding. Surround 2-5 important words with asterisks (e.g., *BOOSTS* or *DIGITAL HEALTH*).
-- "title": The full title of the research.
-- "authors": **COMPLETE list of all authors** - include every author name found in the manuscript. Do not use "et al" or truncate the list.
-- "affiliations": **COMPLETE list of all affiliations** - include every institution, department, and affiliation mentioned. Do not use "(see manuscript for full list)" or truncate.
-- "subtitle": (optional) A brief subtitle if available.
-- "Introduction": EXACTLY 65-75 words. Provide a comprehensive background, context, and rationale for the study. Include key concepts, current state of knowledge, and gaps that justify the research. PRESERVE THE EXACT CITATION STYLE from the original manuscript (e.g., if the PDF uses "(Smith et al., 2020)" or "[1]" or "¹", keep that exact format).
-- "Objective": 15-25 words. Clear, specific research objective or question.
-- "Methods": EXACTLY 80-90 words. Include study design, participants, procedures, data collection, and analysis methods. Be specific about sample size, timeframes, and key variables. PRESERVE THE EXACT CITATION STYLE from the original manuscript.
-- "Results": EXACTLY 80-90 words. Present key findings with specific numbers, percentages, or statistics when available. Include sample sizes, effect sizes, and significance levels.
-- "Discussion": 60-80 words. Interpret the main findings, discuss implications, limitations, and future directions. PRESERVE THE EXACT CITATION STYLE from the original manuscript.
-- "Conclusions": EXACTLY 65-75 words. Summarize key findings and their significance. Include clinical or practical implications and recommendations.
-- "References": Only references actually cited in the Introduction, Methods, or Discussion, PRESERVING THE EXACT REFERENCE FORMAT from the original manuscript (e.g., if the PDF uses APA style, keep APA style; if it uses Vancouver style, keep Vancouver style). Include complete reference details - do not use "et al" in references.
-
-**Example output:**
 {{
-  "headline": "DIGITAL HEALTH *BOOSTS* OUTCOMES in chronic pain",
-  "title": "Digital health interventions for chronic pain: A systematic review",
-  "authors": "Smith J, Doe A, Johnson B, Williams C, Brown D, Davis E, Wilson F, Anderson G, Taylor H, Martinez I",
-  "affiliations": "Department of Pain Medicine, University of Example; School of Health Sciences, Medical College; Institute of Digital Health, Technology University; Department of Psychology, State University; Center for Chronic Pain Research, National Institute",
-  "subtitle": "",
-  "Introduction": "Chronic pain affects millions of people worldwide (Cohen et al., 2021) and remains a significant public health challenge with substantial economic and social costs. Current treatment approaches often provide limited relief, creating an urgent need for innovative solutions. Digital health interventions, including mobile applications, wearable devices, and telehealth platforms, have emerged as promising alternatives that can deliver personalized care remotely (Fishman, 2021). This systematic review examines the effectiveness of these digital interventions in managing chronic pain conditions.",
-  "Objective": "To evaluate the effectiveness of digital health interventions for chronic pain management.",
-  "Methods": "We conducted a systematic review of randomized controlled trials published between 2010 and 2023. Electronic databases including PubMed, Embase, Cochrane Library, and PsycINFO were searched using relevant keywords. Studies were included if they evaluated digital interventions for chronic pain in adults. Primary outcomes were pain intensity and quality of life measures. Two independent reviewers screened articles and extracted data.",
-  "Results": "Twenty-three studies met inclusion criteria with a total of 2,847 participants. Digital interventions led to significant reductions in pain intensity compared to usual care (mean difference -1.2 points on 0-10 scale, 95% CI -1.8 to -0.6). Quality of life improvements were also observed across multiple domains. Mobile applications showed the strongest effects, with 65% of studies reporting clinically meaningful improvements.",
-  "Discussion": "Digital health interventions demonstrate promising results for chronic pain management, particularly mobile applications and telehealth platforms (Smith et al., 2022). However, heterogeneity in intervention types and outcome measures limits generalizability. Long-term effectiveness and cost-effectiveness require further investigation.",
-  "Conclusions": "Digital health interventions can significantly improve outcomes for chronic pain patients, with mobile applications showing particular promise. These findings support the integration of digital solutions into pain management protocols. Future research should focus on long-term efficacy, cost-effectiveness, and implementation strategies.",
-  "References": "Cohen SP, Vase L, Hooten WM. Chronic pain: an update on burden, best practices, and new advances. Lancet. 2021;397(10289):2082-2097. Fishman SM. Addressing the opioid crisis through education. Pain Med. 2021;22(4):741-742. Smith J, Doe A, Johnson B. Digital health interventions for chronic pain. Pain. 2022;163(5):1001-1010."
+  "headline": "Short phrase (3-8 words) with 2-5 words in *asterisks*",
+  "title": "Full research title",
+  "authors": "Complete author list (no et al)",
+  "affiliations": "Complete affiliation list (no et al)",
+  "subtitle": "Brief subtitle or empty string",
+  "Introduction": "65-75 words, preserve citation style",
+  "Objective": "15-25 words",
+  "Methods": "80-90 words, preserve citation style", 
+  "Results": "80-90 words with specific numbers",
+  "Discussion": "60-80 words, preserve citation style",
+  "Conclusions": "65-75 words",
+  "References": "Only cited refs, preserve format"
 }}
 
-**TEXT:**
-{manuscript_text[:30000]}
+Manuscript text:
+{manuscript_text}
 """
 
     try:
@@ -337,134 +335,126 @@ Given the following research manuscript text, extract content for an academic A0
             if not OPENAI_API_KEY:
                 return None, "OpenAI API key not configured"
             
-            print(f"🔧 Creating OpenAI client...")
+            print(f"🔧 Making OpenAI API call directly with requests...")
             try:
-                # Create a completely clean environment for client creation
-                import os
-                import copy
-                import subprocess
-                import sys
+                import requests
+                import json
                 
-                # Save all current environment variables
-                original_env = copy.deepcopy(os.environ)
+                # Check if requests is available
+                if not hasattr(requests, 'post'):
+                    return None, "Requests library not properly imported"
                 
-                # Clear ALL environment variables that might interfere
-                problematic_vars = [
-                    'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
-                    'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
-                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE',
-                    'REQUESTS_PROXIES', 'REQUESTS_VERIFY', 'REQUESTS_CERT',
-                    'CURL_PROXY', 'CURL_VERIFY', 'CURL_CERT'
-                ]
+                headers = {
+                    'Authorization': f'Bearer {OPENAI_API_KEY}',
+                    'Content-Type': 'application/json'
+                }
                 
-                cleared_vars = []
-                for var in problematic_vars:
-                    if var in os.environ:
-                        cleared_vars.append(var)
-                        del os.environ[var]
-                        print(f"🔧 Cleared environment variable: {var}")
+                data = {
+                    'model': 'gpt-4o',  # Using GPT-4o for better academic content processing
+                    'messages': [
+                        {"role": "system", "content": "You are an expert in academic writing and research poster design."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    'temperature': 0.4
+                }
                 
-                # Also clear any requests-related environment variables
-                for key in list(os.environ.keys()):
-                    if 'proxy' in key.lower() or 'cert' in key.lower() or 'verify' in key.lower():
-                        if key not in cleared_vars:
-                            cleared_vars.append(key)
-                            del os.environ[key]
-                            print(f"🔧 Cleared additional environment variable: {key}")
+                response = requests.post(
+                    'https://api.openai.com/v1/chat/completions',
+                    headers=headers,
+                    json=data,
+                    timeout=60
+                )
                 
-                try:
-                    # Create client with minimal environment
-                    openai.api_key = OPENAI_API_KEY
-                    print(f"✅ OpenAI client created successfully")
-                finally:
-                    # Restore original environment
-                    for var in cleared_vars:
-                        if var in original_env:
-                            os.environ[var] = original_env[var]
-                            print(f"🔧 Restored environment variable: {var}")
+                print(f"🔧 OpenAI API response status: {response.status_code}")
+                print(f"🔧 OpenAI API response headers: {dict(response.headers)}")
+                
+                if response.status_code == 200:
+                    try:
+                        result = response.json()
+                        raw_content = result['choices'][0]['message']['content']
+                        print(f"✅ OpenAI API call successful")
+                    except (KeyError, IndexError) as e:
+                        print(f"❌ OpenAI API response structure error: {e}")
+                        print(f"🔧 Full response: {response.text}")
+                        return None, f"OpenAI API response structure error: {e}"
+                    except json.JSONDecodeError as e:
+                        print(f"❌ OpenAI API JSON decode error: {e}")
+                        print(f"🔧 Raw response text: {response.text}")
+                        return None, f"OpenAI API returned invalid JSON: {e}"
+                else:
+                    print(f"❌ OpenAI API error: {response.status_code}")
+                    print(f"🔧 Error response text: {response.text}")
+                    return None, f"OpenAI API error: {response.status_code} - {response.text}"
                         
             except Exception as e:
-                print(f"❌ Error creating OpenAI client: {e}")
+                print(f"❌ Error calling OpenAI API: {e}")
                 print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
-                print(f"🔧 Error type: {type(e)}")
-                print(f"🔧 Error args: {e.args}")
-                return None, f"Error creating OpenAI client: {e}"
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
-                messages=[
-                    {"role": "system", "content": "You are an expert in academic writing and research poster design."},
-                    {"role": "user", "content": prompt}
-                ],
-                temperature=0.4
-            )
-            raw_content = response.choices[0].message.content
+                return None, f"Error calling OpenAI API: {e}"
             
         elif provider == 'anthropic':
             if not ANTHROPIC_API_KEY:
                 return None, "Anthropic API key not configured"
             
-            print(f"🔧 Creating Anthropic client...")
+            print(f"🔧 Making Anthropic API call directly with requests...")
             try:
-                # Create a completely clean environment for client creation
-                import os
-                import copy
-                import subprocess
-                import sys
+                import requests
+                import json
                 
-                # Save all current environment variables
-                original_env = copy.deepcopy(os.environ)
+                # Check if requests is available
+                if not hasattr(requests, 'post'):
+                    return None, "Requests library not properly imported"
                 
-                # Clear ALL environment variables that might interfere
-                problematic_vars = [
-                    'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
-                    'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
-                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE',
-                    'REQUESTS_PROXIES', 'REQUESTS_VERIFY', 'REQUESTS_CERT',
-                    'CURL_PROXY', 'CURL_VERIFY', 'CURL_CERT'
-                ]
+                headers = {
+                    'x-api-key': ANTHROPIC_API_KEY,
+                    'Content-Type': 'application/json',
+                    'anthropic-version': '2023-06-01'
+                }
                 
-                cleared_vars = []
-                for var in problematic_vars:
-                    if var in os.environ:
-                        cleared_vars.append(var)
-                        del os.environ[var]
-                        print(f"🔧 Cleared environment variable: {var}")
+                data = {
+                    'model': 'claude-3-5-sonnet-20241022',  # Latest Claude 3.5 Sonnet model
+                    'max_tokens': 4000,
+                    'temperature': 0.4,
+                    'system': 'You are an expert in academic writing and research poster design.',
+                    'messages': [
+                        {"role": "user", "content": prompt}
+                    ]
+                }
                 
-                # Also clear any requests-related environment variables
-                for key in list(os.environ.keys()):
-                    if 'proxy' in key.lower() or 'cert' in key.lower() or 'verify' in key.lower():
-                        if key not in cleared_vars:
-                            cleared_vars.append(key)
-                            del os.environ[key]
-                            print(f"🔧 Cleared additional environment variable: {key}")
+                print(f"🔧 Using Anthropic model: {data['model']}")
+                print(f"🔧 Anthropic API request data: {data}")
                 
-                try:
-                    # Create client with minimal environment
-                    anthropic.api_key = ANTHROPIC_API_KEY
-                    print(f"✅ Anthropic client created successfully")
-                finally:
-                    # Restore original environment
-                    for var in cleared_vars:
-                        if var in original_env:
-                            os.environ[var] = original_env[var]
-                            print(f"🔧 Restored environment variable: {var}")
+                response = requests.post(
+                    'https://api.anthropic.com/v1/messages',
+                    headers=headers,
+                    json=data,
+                    timeout=60
+                )
+                
+                print(f"🔧 Anthropic API response status: {response.status_code}")
+                print(f"🔧 Anthropic API response headers: {dict(response.headers)}")
+                
+                if response.status_code == 200:
+                    try:
+                        result = response.json()
+                        raw_content = result['content'][0]['text']
+                        print(f"✅ Anthropic API call successful")
+                    except (KeyError, IndexError) as e:
+                        print(f"❌ Anthropic API response structure error: {e}")
+                        print(f"🔧 Full response: {response.text}")
+                        return None, f"Anthropic API response structure error: {e}"
+                    except json.JSONDecodeError as e:
+                        print(f"❌ Anthropic API JSON decode error: {e}")
+                        print(f"🔧 Raw response text: {response.text}")
+                        return None, f"Anthropic API returned invalid JSON: {e}"
+                else:
+                    print(f"❌ Anthropic API error: {response.status_code}")
+                    print(f"🔧 Error response text: {response.text}")
+                    return None, f"Anthropic API error: {response.status_code} - {response.text}"
                         
             except Exception as e:
-                print(f"❌ Error creating Anthropic client: {e}")
+                print(f"❌ Error calling Anthropic API: {e}")
                 print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
-                print(f"🔧 Error type: {type(e)}")
-                print(f"🔧 Error args: {e.args}")
-                return None, f"Error creating Anthropic client: {e}"
-            response = anthropic.Client().messages.create(
-                model="claude-3-sonnet-20240229",
-                max_tokens=4000,
-                temperature=0.4,
-                system="You are an expert in academic writing and research poster design.",
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            raw_content = response.content[0].text
+                return None, f"Error calling Anthropic API: {e}"
             
         else:
             return None, f"Unsupported API provider: {provider}"
@@ -512,12 +502,16 @@ Given the following research manuscript text, extract content for an academic A0
                 print(f"✅ Successfully parsed as JSON")
             except json.JSONDecodeError as json_error:
                 print(f"⚠️ JSON parsing failed: {json_error}")
+                print(f"🔧 Failed content (first 500 chars): {cleaned_content[:500]}")
+                print(f"🔧 Failed content (last 500 chars): {cleaned_content[-500:]}")
+                
                 # If JSON fails, try Python eval (handles single quotes)
                 try:
                     poster = eval(cleaned_content)
                     print(f"✅ Successfully parsed with eval")
                 except Exception as eval_error:
                     print(f"❌ Eval parsing failed: {eval_error}")
+                    print(f"🔧 Content that failed eval: {cleaned_content[:1000]}")
                     raise eval_error
             
             # Clean up references
@@ -2029,7 +2023,8 @@ if __name__ == '__main__':
         print("❌ Anthropic API key not configured")
     
     print(f"🔧 Default API provider: {current_api_provider.upper()}")
-    print(f"🔧 Anthropic version: {anthropic.__version__}")
+    print(f"🔧 OpenAI model: GPT-4o")
+    print(f"🔧 Anthropic model: Claude 3.5 Sonnet")
     print(f"🔧 Environment check - OpenAI key: {'✅ Set' if OPENAI_API_KEY else '❌ Missing'}")
     if OPENAI_API_KEY:
         print(f"🔧 OpenAI key starts with: {OPENAI_API_KEY[:10]}...")

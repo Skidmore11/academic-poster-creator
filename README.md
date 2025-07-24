@@ -62,26 +62,6 @@ Open your browser to `http://localhost:5000`
 4. Create a new key
 5. Copy it (starts with `sk-ant-`)
 
-## Putting It Online
-
-Want to share this with others? Here are your options:
-
-### Railway (Easiest - 5 minutes)
-1. Go to [railway.app](https://railway.app)
-2. Sign up with GitHub
-3. Click "New Project" → "Deploy from GitHub repo"
-4. Pick your repository
-5. Add your API key in "Variables"
-6. Done!
-
-### Render (Free Forever)
-1. Go to [render.com](https://render.com)
-2. Sign up with GitHub
-3. Create "Web Service"
-4. Connect your repo
-5. Add your API key
-6. Deploy!
-
 ## How It Works
 
 1. **Upload**: You upload a research paper PDF
@@ -93,56 +73,6 @@ Want to share this with others? Here are your options:
 3. **Template**: It puts everything into a professional poster template
 4. **Download**: You get a PowerPoint file ready to print
 
-## Customization
-
-### Adding New Templates
-1. Create a PowerPoint template with named text boxes
-2. Upload it through the web interface
-3. The app will use it automatically
-
-### Changing the AI Prompt
-Edit the prompt in `app.py` if you want the AI to extract information differently.
-
-### Styling
-Modify the CSS in `templates/index.html` to change how the website looks.
-
-## Troubleshooting
-
-### "API key not configured"
-- Make sure you added your API key to the `.env` file
-- Check that the key starts with `sk-`
-
-### "Module not found"
-- Run `pip install -r requirements.txt`
-- Make sure you're in your virtual environment
-
-### "Port already in use"
-- Change the port in `app.py` or close other programs using port 5000
-
-### Large files won't upload
-- The limit is 500MB total
-- Try compressing your images first
-
-## Cost
-
-- **OpenAI**: About $0.01-0.05 per poster (very cheap)
-- **Anthropic**: Similar pricing
-- **Hosting**: Free on Render, $5/month on Railway
-
-## Security Notes
-
-- Never commit your API keys to GitHub
-- The app validates file types and sizes
-- Use HTTPS in production (automatic on most platforms)
-
-## Contributing
-
-Found a bug? Want to add a feature? 
-
-1. Fork the repository
-2. Make your changes
-3. Test them locally
-4. Submit a pull request
 
 ## Support
 
@@ -154,11 +84,3 @@ Having trouble?
 ## Why I Built This
 
 I got tired of spending hours manually copying text from papers into poster templates. This automates the boring part so you can focus on the research!
-
-## License
-
-MIT License - use it however you want.
-
----
-
-**Happy poster making!** 🎨 
