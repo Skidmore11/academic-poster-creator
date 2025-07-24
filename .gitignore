@@ -51,11 +51,12 @@ Thumbs.db
 
 # Uploads and generated files
 uploads/
-*.pptx
+# Allow template files but exclude generated files
+!template_library/**/*.pptx
+!template_library/**/*.png
+!template_library/**/*.jpg
+!template_library/**/*.jpeg
 *.pdf
-*.png
-*.jpg
-*.jpeg
 dummy_api_response.json
 
 # Logs
