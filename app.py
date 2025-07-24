@@ -340,27 +340,20 @@ Given the following research manuscript text, extract content for an academic A0
             
             print(f"🔧 Creating OpenAI client...")
             try:
-                # Clear any proxy environment variables that might interfere
+                # Clear ALL proxy environment variables
                 import os
-                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']
-                original_proxy_values = {}
-                
-                # Store original values and clear them temporarily
-                for var in proxy_vars:
-                    if var in os.environ:
-                        original_proxy_values[var] = os.environ[var]
-                        del os.environ[var]
-                        print(f"🔧 Temporarily cleared proxy variable: {var}")
-                
+                proxy_vars = [k for k in os.environ if 'proxy' in k.lower()]
+                original_proxy_values = {k: os.environ[k] for k in proxy_vars}
+                for k in proxy_vars:
+                    del os.environ[k]
+                    print(f"🔧 Aggressively cleared proxy variable: {k}")
                 try:
                     client = openai.OpenAI(api_key=OPENAI_API_KEY)
                     print(f"✅ OpenAI client created successfully")
                 finally:
-                    # Restore original proxy values
-                    for var, value in original_proxy_values.items():
-                        os.environ[var] = value
-                        print(f"🔧 Restored proxy variable: {var}")
-                        
+                    for k, v in original_proxy_values.items():
+                        os.environ[k] = v
+                        print(f"🔧 Restored proxy variable: {k}")
             except Exception as e:
                 print(f"❌ Error creating OpenAI client: {e}")
                 return None, f"Error creating OpenAI client: {e}"
@@ -373,34 +366,27 @@ Given the following research manuscript text, extract content for an academic A0
                 temperature=0.4
             )
             raw_content = response.choices[0].message.content
-            
+        
         elif provider == 'anthropic':
             if not ANTHROPIC_API_KEY:
                 return None, "Anthropic API key not configured"
             
             print(f"🔧 Creating Anthropic client...")
             try:
-                # Clear any proxy environment variables that might interfere
+                # Clear ALL proxy environment variables
                 import os
-                proxy_vars = ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy']
-                original_proxy_values = {}
-                
-                # Store original values and clear them temporarily
-                for var in proxy_vars:
-                    if var in os.environ:
-                        original_proxy_values[var] = os.environ[var]
-                        del os.environ[var]
-                        print(f"🔧 Temporarily cleared proxy variable: {var}")
-                
+                proxy_vars = [k for k in os.environ if 'proxy' in k.lower()]
+                original_proxy_values = {k: os.environ[k] for k in proxy_vars}
+                for k in proxy_vars:
+                    del os.environ[k]
+                    print(f"🔧 Aggressively cleared proxy variable: {k}")
                 try:
                     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
                     print(f"✅ Anthropic client created successfully")
                 finally:
-                    # Restore original proxy values
-                    for var, value in original_proxy_values.items():
-                        os.environ[var] = value
-                        print(f"🔧 Restored proxy variable: {var}")
-                        
+                    for k, v in original_proxy_values.items():
+                        os.environ[k] = v
+                        print(f"🔧 Restored proxy variable: {k}")
             except Exception as e:
                 print(f"❌ Error creating Anthropic client: {e}")
                 return None, f"Error creating Anthropic client: {e}"
@@ -414,7 +400,7 @@ Given the following research manuscript text, extract content for an academic A0
                 ]
             )
             raw_content = response.content[0].text
-            
+        
         else:
             return None, f"Unsupported API provider: {provider}"
         
