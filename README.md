@@ -1,228 +1,164 @@
 # Academic Poster Creator
 
-An AI-powered web application that automatically generates professional academic posters from research manuscripts. Upload a PDF, and the app extracts key information using AI to create a beautifully formatted research poster.
+Turn your research papers into beautiful academic posters with AI! Just upload a PDF and watch the magic happen.
 
-## 🚀 Features
+## What This Does
 
-- **AI-Powered Content Extraction**: Uses OpenAI GPT-4 or Anthropic Claude to extract structured content from research papers
-- **Multiple Template Support**: Choose from various professional poster templates
-- **Figure Integration**: Upload up to 4 figures with descriptions
-- **Dynamic Font Sizing**: Automatically adjusts font sizes based on content length
-- **Modern Web Interface**: Beautiful, responsive design with drag-and-drop uploads
-- **Template Library Management**: Upload and manage your own templates
-- **Dual AI Provider Support**: Switch between OpenAI and Anthropic APIs
+Ever spent hours trying to fit your research into a poster template? This app does that for you. Upload your research paper (PDF), and it uses AI to pull out the important stuff and put it into a professional poster format.
 
-## 🛠️ Technology Stack
+## Features
 
-- **Backend**: Python Flask
-- **AI APIs**: OpenAI GPT-4, Anthropic Claude
-- **PDF Processing**: PyMuPDF
-- **Document Generation**: python-pptx
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap 5
-- **Image Processing**: Pillow
+- **AI Magic**: Uses ChatGPT or Claude to read your paper and extract the good stuff
+- **Multiple Templates**: Choose from different poster styles
+- **Add Your Figures**: Upload up to 4 images with descriptions
+- **Smart Sizing**: Automatically adjusts text size so everything fits nicely
+- **Easy to Use**: Just upload and download - no design skills needed
 
-## 📋 Prerequisites
+## What You Need
 
-- Python 3.8 or higher
-- OpenAI API key OR Anthropic API key
-- Git
+- Python 3.8 or newer
+- An OpenAI API key (or Anthropic if you prefer Claude)
+- That's it!
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Clone the Repository
-
+### 1. Get the Code
 ```bash
-git clone https://github.com/yourusername/academic-poster-creator.git
+git clone https://github.com/Skidmore11/academic-poster-creator.git
 cd academic-poster-creator
 ```
 
-### 2. Set Up Virtual Environment
-
+### 2. Set It Up
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python setup.py
+```
+This will create a virtual environment and install everything you need.
+
+### 3. Add Your API Key
+Edit the `.env` file and add your OpenAI API key:
+```
+OPENAI_API_KEY=your_key_here
 ```
 
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Configure Environment Variables
-
-Create a `.env` file in the project root:
-
-```env
-# Required: At least one API key must be set
-OPENAI_API_KEY=your_openai_api_key_here
-ANTHROPIC_API_KEY=your_anthropic_api_key_here
-
-# Optional: Flask secret key (auto-generated if not set)
-FLASK_SECRET_KEY=your_secret_key_here
-```
-
-### 5. Run the Application
-
+### 4. Run It
 ```bash
 python app.py
 ```
+Open your browser to `http://localhost:5000`
 
-The application will be available at `http://localhost:5000`
+## Getting an API Key
 
-## 🌐 Deployment Options
+### OpenAI (Recommended)
+1. Go to [platform.openai.com](https://platform.openai.com)
+2. Sign up (it's free)
+3. Go to "API Keys" 
+4. Click "Create new secret key"
+5. Copy the key (starts with `sk-`)
 
-### Option 1: Railway (Recommended for Beginners)
+### Anthropic (Alternative)
+1. Go to [console.anthropic.com](https://console.anthropic.com)
+2. Sign up
+3. Go to "API Keys"
+4. Create a new key
+5. Copy it (starts with `sk-ant-`)
 
-1. **Create Railway Account**: Sign up at [railway.app](https://railway.app)
-2. **Connect GitHub**: Link your GitHub repository
-3. **Deploy**: Railway will automatically detect it's a Python app and deploy
-4. **Set Environment Variables**: Add your API keys in Railway dashboard
-5. **Access**: Your app will be live at a Railway URL
+## Putting It Online
 
-### Option 2: Render
+Want to share this with others? Here are your options:
 
-1. **Create Render Account**: Sign up at [render.com](https://render.com)
-2. **New Web Service**: Connect your GitHub repository
-3. **Configure**:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python app.py`
-   - **Environment**: Python 3
-4. **Set Environment Variables**: Add your API keys
-5. **Deploy**: Render will build and deploy your app
+### Railway (Easiest - 5 minutes)
+1. Go to [railway.app](https://railway.app)
+2. Sign up with GitHub
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Pick your repository
+5. Add your API key in "Variables"
+6. Done!
 
-### Option 3: Heroku
+### Render (Free Forever)
+1. Go to [render.com](https://render.com)
+2. Sign up with GitHub
+3. Create "Web Service"
+4. Connect your repo
+5. Add your API key
+6. Deploy!
 
-1. **Create Heroku Account**: Sign up at [heroku.com](https://heroku.com)
-2. **Install Heroku CLI**: Download and install from Heroku website
-3. **Login**: `heroku login`
-4. **Create App**: `heroku create your-app-name`
-5. **Set Environment Variables**:
-   ```bash
-   heroku config:set OPENAI_API_KEY=your_key_here
-   heroku config:set ANTHROPIC_API_KEY=your_key_here
-   ```
-6. **Deploy**: `git push heroku main`
+## How It Works
 
-### Option 4: DigitalOcean App Platform
+1. **Upload**: You upload a research paper PDF
+2. **AI Reads**: The AI reads through your paper and extracts:
+   - Title and authors
+   - Introduction and background
+   - Methods and results
+   - Conclusions and references
+3. **Template**: It puts everything into a professional poster template
+4. **Download**: You get a PowerPoint file ready to print
 
-1. **Create DigitalOcean Account**: Sign up at [digitalocean.com](https://digitalocean.com)
-2. **Create App**: Connect your GitHub repository
-3. **Configure**:
-   - **Source**: GitHub repository
-   - **Environment**: Python
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Run Command**: `python app.py`
-4. **Set Environment Variables**: Add your API keys
-5. **Deploy**: DigitalOcean will build and deploy your app
-
-## 🔧 Configuration
-
-### Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `OPENAI_API_KEY` | Yes* | Your OpenAI API key |
-| `ANTHROPIC_API_KEY` | Yes* | Your Anthropic API key |
-| `FLASK_SECRET_KEY` | No | Flask secret key (auto-generated if not set) |
-
-*At least one API key must be set
-
-### App Configuration
-
-Edit the configuration section in `app.py`:
-
-```python
-# File Settings
-UPLOAD_FOLDER = 'uploads'
-MAX_CONTENT_LENGTH = 500 * 1024 * 1024  # 500MB max file size
-
-# Cleanup Settings
-AUTO_CLEANUP_UPLOADS = True
-KEEP_FINAL_OUTPUT = True
-
-# Testing Settings
-USE_DUMMY_DATA = False
-```
-
-## 📁 Project Structure
-
-```
-academic-poster-creator/
-├── app.py                 # Main Flask application
-├── template_configs.py    # Template configuration and settings
-├── requirements.txt       # Python dependencies
-├── .env                   # Environment variables (create this)
-├── .gitignore            # Git ignore rules
-├── README.md             # This file
-├── static/               # Static assets (CSS, JS, images)
-├── templates/            # HTML templates
-├── template_library/     # PowerPoint template library
-│   ├── available/        # Available templates
-│   ├── coming_soon/      # Coming soon templates
-│   └── premium/          # Premium templates
-└── uploads/              # Temporary upload storage
-```
-
-## 🎨 Customization
+## Customization
 
 ### Adding New Templates
+1. Create a PowerPoint template with named text boxes
+2. Upload it through the web interface
+3. The app will use it automatically
 
-1. Create your PowerPoint template with named shapes
-2. Upload via the web interface or place in `template_library/available/`
-3. Add configuration in `template_configs.py` if needed
+### Changing the AI Prompt
+Edit the prompt in `app.py` if you want the AI to extract information differently.
 
-### Modifying AI Prompts
+### Styling
+Modify the CSS in `templates/index.html` to change how the website looks.
 
-Edit the prompt in the `call_ai_api()` function in `app.py` to customize how the AI extracts information.
+## Troubleshooting
 
-### Styling Changes
+### "API key not configured"
+- Make sure you added your API key to the `.env` file
+- Check that the key starts with `sk-`
 
-Modify the CSS in `templates/index.html` to change the appearance.
+### "Module not found"
+- Run `pip install -r requirements.txt`
+- Make sure you're in your virtual environment
 
-## 🔒 Security Considerations
+### "Port already in use"
+- Change the port in `app.py` or close other programs using port 5000
 
-- **API Keys**: Never commit API keys to version control
-- **File Uploads**: The app validates file types and sizes
-- **Environment Variables**: Use `.env` file for local development
-- **HTTPS**: Always use HTTPS in production
+### Large files won't upload
+- The limit is 500MB total
+- Try compressing your images first
 
-## 🐛 Troubleshooting
+## Cost
 
-### Common Issues
+- **OpenAI**: About $0.01-0.05 per poster (very cheap)
+- **Anthropic**: Similar pricing
+- **Hosting**: Free on Render, $5/month on Railway
 
-1. **"API key not configured"**: Make sure your `.env` file has the correct API keys
-2. **"Module not found"**: Run `pip install -r requirements.txt`
-3. **"Port already in use"**: Change the port in `app.py` or kill the existing process
-4. **Large file uploads fail**: Check the `MAX_CONTENT_LENGTH` setting
+## Security Notes
 
-### Debug Mode
+- Never commit your API keys to GitHub
+- The app validates file types and sizes
+- Use HTTPS in production (automatic on most platforms)
 
-Set `USE_DUMMY_DATA = True` in `app.py` to test without API calls.
+## Contributing
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Contributing
+Found a bug? Want to add a feature? 
 
 1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Make your changes
+3. Test them locally
+4. Submit a pull request
 
-## 📞 Support
+## Support
 
-If you encounter any issues or have questions:
-
+Having trouble?
 1. Check the troubleshooting section above
-2. Search existing GitHub issues
-3. Create a new issue with detailed information
+2. Look at existing GitHub issues
+3. Create a new issue with details about what went wrong
 
-## 🙏 Acknowledgments
+## Why I Built This
 
-- OpenAI for GPT-4 API
-- Anthropic for Claude API
-- The Flask community for the excellent web framework
-- All contributors and users of this project 
+I got tired of spending hours manually copying text from papers into poster templates. This automates the boring part so you can focus on the research!
+
+## License
+
+MIT License - use it however you want.
+
+---
+
+**Happy poster making!** 🎨 
