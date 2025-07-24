@@ -214,18 +214,21 @@
 
         /* Features Section */
         .features-section {
+            display: flex;
+            justify-content: center;
+            padding: 0 2rem;
+            margin-top: -20px;
+            margin-bottom: 4rem;
+        }
+
+        .features-container {
             background: var(--bg-primary);
             padding: 5rem 2rem;
             position: relative;
             border-radius: 40px;
-            margin-top: -20px;
-            margin-bottom: 4rem;
             box-shadow: var(--shadow-xl);
-        }
-
-        .features-container {
             max-width: 1200px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .section-header {
@@ -311,17 +314,20 @@
 
         /* How It Works Section */
         .how-it-works {
-            background: var(--bg-secondary);
-            padding: 5rem 2rem;
-            border-radius: 40px;
+            display: flex;
+            justify-content: center;
+            padding: 0 2rem;
             margin-top: 4rem;
             margin-bottom: 4rem;
-            box-shadow: var(--shadow-xl);
         }
 
         .steps-container {
+            background: var(--bg-secondary);
+            padding: 5rem 2rem;
+            border-radius: 40px;
+            box-shadow: var(--shadow-xl);
             max-width: 1000px;
-            margin: 0 auto;
+            width: 100%;
         }
 
         .steps-grid {
@@ -2483,6 +2489,108 @@
             .figure-preview-container div[style*="position: relative; display: inline-block"]:hover .preview-overlay {
                 opacity: 1 !important;
             }
+
+            /* PDF Preview Styles */
+            .pdf-preview-container {
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+                border-radius: 20px;
+                padding: 1.5rem;
+                box-shadow: var(--shadow-md);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+                gap: 1.5rem;
+            }
+
+            .pdf-preview-container:hover {
+                box-shadow: var(--shadow-lg);
+                transform: translateY(-2px);
+            }
+
+            .pdf-preview-canvas {
+                width: 100%;
+                height: 400px;
+                border-radius: 16px;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+                border: 3px solid var(--border-color);
+                background: white;
+                object-fit: contain;
+            }
+
+            #pdf-canvas-container {
+                width: 100%;
+                height: 400px;
+                padding: 1.5rem;
+                box-shadow: var(--shadow-xl);
+                border-radius: 16px;
+                background: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+            }
+
+            .pdf-preview-info {
+                font-size: 1rem;
+                color: var(--text-primary);
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .pdf-preview-info .filename {
+                font-weight: 700;
+                font-size: 1.1rem;
+                color: var(--text-primary);
+            }
+
+            .pdf-preview-info .file-details {
+                font-size: 0.9rem;
+                color: var(--text-secondary);
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .pdf-preview-actions {
+                display: flex;
+                gap: 0.75rem;
+                margin-top: 1rem;
+            }
+
+            .pdf-preview-btn.remove {
+                padding: 0.75rem 1.25rem;
+                border-radius: 12px;
+                font-size: 0.9rem;
+                gap: 0.5rem;
+                box-shadow: var(--shadow-sm);
+                background: linear-gradient(135deg, var(--error-color), #dc2626);
+                border: none;
+                color: white;
+                font-weight: 600;
+                transition: all 0.3s ease;
+            }
+
+            .pdf-preview-btn.remove:hover {
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+                background: linear-gradient(135deg, #dc2626, #b91c1c);
+            }
+
+            .pdf-loading {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 1rem;
+                padding: 2rem;
+                color: var(--text-secondary);
+            }
+
+            .pdf-loading .spinner-border {
+                width: 2rem;
+                height: 2rem;
+                border-width: 0.2rem;
+            }
         }
 
 
@@ -2950,8 +3058,28 @@
                                     <i class="fas fa-upload me-2"></i>Choose PDF
                                 </button>
                             </div>
-                            
 
+                            <!-- PDF Upload Confirmation (shown when file is uploaded) -->
+                            <div id="pdfPreviewContent" style="display: none; width: 100%;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="pdf-preview-info">
+                                            <div class="filename" id="pdfFileName"></div>
+                                            <div class="file-details" id="pdfFileDetails"></div>
+                                            <div class="pdf-preview-actions">
+                                                <button type="button" class="btn pdf-preview-btn remove" onclick="removePdf()">
+                                                    <i class="fas fa-trash me-1"></i>Remove PDF
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="pdf-canvas-container">
+                                            <!-- PDF preview will be rendered here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -3212,7 +3340,12 @@
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?v=20250724"></script>
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js?v=1"></script>
+    <script>
+        // Set PDF.js worker path
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    </script>
     <script>
         // Global variables
         let selectedTemplateFilename = 'default';
@@ -3268,7 +3401,11 @@
             fetch('/api/mode')
                 .then(response => response.json())
                 .then(modeData => {
-                    updateToggleUI(modeData.use_dummy_data);
+                    if (typeof updateToggleUI === 'function') {
+                        updateToggleUI(modeData.use_dummy_data);
+                    } else {
+                        console.warn('updateToggleUI function not available yet');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading mode data:', error);
@@ -3277,31 +3414,47 @@
             fetch('/api/dummy-data-status')
                 .then(response => response.json())
                 .then(dummyData => {
-                    updateDummyDataStatus(dummyData);
+                    if (typeof updateDummyDataStatus === 'function') {
+                        updateDummyDataStatus(dummyData);
+                    } else {
+                        console.warn('updateDummyDataStatus function not available yet');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading dummy data:', error);
-                    updateDummyDataStatus({ available: false, error: error.message });
+                    if (typeof updateDummyDataStatus === 'function') {
+                        updateDummyDataStatus({ available: false, error: error.message });
+                    }
                 });
             
             fetch('/api/template-library')
                 .then(response => response.json())
                 .then(templateData => {
-                    if (templateData.success && templateData.templates) {
-                        updateTemplateLibrary(templateData.templates);
+                    if (typeof updateTemplateLibrary === 'function') {
+                        if (templateData.success && templateData.templates) {
+                            updateTemplateLibrary(templateData.templates);
+                        } else {
+                            updateTemplateLibrary([]);
+                        }
                     } else {
-                        updateTemplateLibrary([]);
+                        console.warn('updateTemplateLibrary function not available yet');
                     }
                 })
                 .catch(error => {
                     console.error('Error loading template data:', error);
-                    updateTemplateLibrary([]);
+                    if (typeof updateTemplateLibrary === 'function') {
+                        updateTemplateLibrary([]);
+                    }
                 });
             
             fetch('/api/provider')
                 .then(response => response.json())
                 .then(providerData => {
-                    updateProviderUI(providerData);
+                    if (typeof updateProviderUI === 'function') {
+                        updateProviderUI(providerData);
+                    } else {
+                        console.warn('updateProviderUI function not available yet');
+                    }
                 })
                 .catch(error => {
                     console.error('Error loading provider data:', error);
@@ -3323,12 +3476,8 @@
                     const isFigureUpload = inputId.includes('figure');
                     
                     if (isPdfUpload && file.type === 'application/pdf') {
-                        // Show simple file info for PDF
-                        info.innerHTML = `
-                            <i class="fas fa-file-pdf me-2"></i>
-                            <strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)
-                        `;
-                        info.style.display = 'block';
+                        // Create PDF preview
+                        showPdfPreview(file);
                     } else if (isFigureUpload && file.type.startsWith('image/')) {
                         // Create image preview for figures
                         const reader = new FileReader();
@@ -3423,8 +3572,122 @@
             }
         }
 
+        // PDF Preview with actual rendering
+        async function showPdfPreview(file) {
+            console.log('PDF file selected:', file.name);
+            
+            // Hide upload content and show preview
+            const uploadContent = document.getElementById('uploadContent');
+            const previewContent = document.getElementById('pdfPreviewContent');
+            
+            if (uploadContent) uploadContent.style.display = 'none';
+            if (previewContent) previewContent.style.display = 'block';
+            
+            // Update file info
+            const fileName = document.getElementById('pdfFileName');
+            const fileDetails = document.getElementById('pdfFileDetails');
+            
+            if (fileName) {
+                fileName.innerHTML = `${file.name}`;
+            }
+            
+            if (fileDetails) {
+                fileDetails.innerHTML = `File size: ${(file.size / 1024 / 1024).toFixed(2)} MB`;
+            }
+            
+            // Show loading state
+            const canvasContainer = document.getElementById('pdf-canvas-container');
+            if (canvasContainer) {
+                canvasContainer.innerHTML = `
+                    <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 3px solid #e5e7eb;">
+                        <div class="spinner-border text-primary" role="status" style="width: 2rem; height: 2rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p style="color: #6b7280; margin-top: 1rem;">Generating PDF preview...</p>
+                    </div>
+                `;
+            }
+            
+            try {
+                // Read the PDF file
+                const arrayBuffer = await file.arrayBuffer();
+                console.log('PDF file read successfully, size:', arrayBuffer.byteLength);
+                
+                // Load the PDF document
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                console.log('PDF document loaded, pages:', pdf.numPages);
+                
+                // Get the first page
+                const page = await pdf.getPage(1);
+                console.log('First page loaded');
+                
+                // Calculate scale for the canvas (target height: 300px)
+                const viewport = page.getViewport({ scale: 1.0 });
+                const scale = 300 / viewport.height;
+                const scaledViewport = page.getViewport({ scale: scale });
+                
+                console.log('Calculated scale:', scale, 'Viewport size:', scaledViewport.width, 'x', scaledViewport.height);
+                
+                // Create canvas
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = scaledViewport.height;
+                canvas.width = scaledViewport.width;
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
+                canvas.style.borderRadius = '8px';
+                canvas.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                
+                console.log('Canvas created with dimensions:', canvas.width, 'x', canvas.height);
+                
+                // Render the page
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: scaledViewport
+                };
+                
+                await page.render(renderContext).promise;
+                console.log('PDF page rendered successfully');
+                
+                // Update the canvas container with the canvas
+                if (canvasContainer) {
+                    console.log('Updating canvas container with canvas');
+                    canvasContainer.innerHTML = '';
+                    canvasContainer.appendChild(canvas);
+                    console.log('Canvas added to canvas container');
+                } else {
+                    console.error('canvasContainer not found!');
+                }
+                
+            } catch (error) {
+                console.error('Error generating PDF preview:', error);
+                
+                // Show error state
+                if (canvasContainer) {
+                    canvasContainer.innerHTML = `
+                        <div style="background: white; border-radius: 16px; padding: 2rem; text-align: center; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); border: 3px solid #e5e7eb;">
+                            <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                            <p style="color: #6b7280; margin-top: 1rem;">Could not generate preview</p>
+                            <small style="color: #9ca3af;">PDF file loaded successfully</small>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function removePdf() {
+            console.log('Removing PDF');
+            
+            const pdfFile = document.getElementById('pdfFile');
+            const uploadContent = document.getElementById('uploadContent');
+            const previewContent = document.getElementById('pdfPreviewContent');
+            
+            if (pdfFile) pdfFile.value = '';
+            if (uploadContent) uploadContent.style.display = 'block';
+            if (previewContent) previewContent.style.display = 'none';
+        }
+
         // Setup file uploads
-        setupFileUpload('pdfFile', 'pdfUploadArea', 'pdfFileInfo');
         setupFileUpload('figure1File', 'figure1UploadArea', 'figure1FileInfo');
         setupFileUpload('figure2File', 'figure2UploadArea', 'figure2FileInfo');
         setupFileUpload('figure3File', 'figure3UploadArea', 'figure3FileInfo');
@@ -3458,8 +3721,11 @@
 
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            loadInitialData();
-            loadTemplateShowcase();
+            // Delay loading initial data to ensure all functions are defined
+            setTimeout(() => {
+                loadInitialData();
+                loadTemplateShowcase();
+            }, 100);
             
             // Test PDF.js loading
             console.log('[DEBUG] Checking PDF.js library...');
@@ -3469,6 +3735,18 @@
             } else {
                 console.error('[DEBUG] PDF.js library not loaded!');
             }
+
+            // Simple PDF file upload setup
+            const pdfFile = document.getElementById('pdfFile');
+            if (pdfFile) {
+                pdfFile.addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (file && file.type === 'application/pdf') {
+                        showPdfPreview(file);
+                    }
+                });
+            }
+
         });
 
         // FAQ Toggle Function
@@ -4654,8 +4932,6 @@
                 }
             };
         }
-        // Setup AI provider toggle after function is defined
-        setupAIProviderToggle();
 
         // Simple popup logic
         function showFigurePopup(figureNum, imgSrc, description, event) {

@@ -45,6 +45,13 @@ current_api_provider = DEFAULT_API_PROVIDER
 if not OPENAI_API_KEY and not ANTHROPIC_API_KEY:
     raise ValueError("At least one API key must be set. Please set OPENAI_API_KEY or ANTHROPIC_API_KEY in your .env file.")
 
+# Validate API key formats
+if OPENAI_API_KEY and not OPENAI_API_KEY.startswith('sk-'):
+    print(f"⚠️ Warning: OpenAI API key doesn't start with 'sk-': {OPENAI_API_KEY[:10]}...")
+
+if ANTHROPIC_API_KEY and not ANTHROPIC_API_KEY.startswith('sk-ant-'):
+    print(f"⚠️ Warning: Anthropic API key doesn't start with 'sk-ant-': {ANTHROPIC_API_KEY[:10]}...")
+
 # 📁 File Settings
 UPLOAD_FOLDER = 'uploads'
 TEMPLATE_LIBRARY_FOLDER = 'template_library'
