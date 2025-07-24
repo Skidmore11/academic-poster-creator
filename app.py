@@ -342,6 +342,8 @@ Given the following research manuscript text, extract content for an academic A0
                 # Create a completely clean environment for client creation
                 import os
                 import copy
+                import subprocess
+                import sys
                 
                 # Save all current environment variables
                 original_env = copy.deepcopy(os.environ)
@@ -350,7 +352,9 @@ Given the following research manuscript text, extract content for an academic A0
                 problematic_vars = [
                     'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
                     'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
-                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE'
+                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE',
+                    'REQUESTS_PROXIES', 'REQUESTS_VERIFY', 'REQUESTS_CERT',
+                    'CURL_PROXY', 'CURL_VERIFY', 'CURL_CERT'
                 ]
                 
                 cleared_vars = []
@@ -359,6 +363,14 @@ Given the following research manuscript text, extract content for an academic A0
                         cleared_vars.append(var)
                         del os.environ[var]
                         print(f"🔧 Cleared environment variable: {var}")
+                
+                # Also clear any requests-related environment variables
+                for key in list(os.environ.keys()):
+                    if 'proxy' in key.lower() or 'cert' in key.lower() or 'verify' in key.lower():
+                        if key not in cleared_vars:
+                            cleared_vars.append(key)
+                            del os.environ[key]
+                            print(f"🔧 Cleared additional environment variable: {key}")
                 
                 try:
                     # Create client with minimal environment
@@ -374,6 +386,8 @@ Given the following research manuscript text, extract content for an academic A0
             except Exception as e:
                 print(f"❌ Error creating OpenAI client: {e}")
                 print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
+                print(f"🔧 Error type: {type(e)}")
+                print(f"🔧 Error args: {e.args}")
                 return None, f"Error creating OpenAI client: {e}"
             response = client.chat.completions.create(
                 model="gpt-4o",
@@ -394,6 +408,8 @@ Given the following research manuscript text, extract content for an academic A0
                 # Create a completely clean environment for client creation
                 import os
                 import copy
+                import subprocess
+                import sys
                 
                 # Save all current environment variables
                 original_env = copy.deepcopy(os.environ)
@@ -402,7 +418,9 @@ Given the following research manuscript text, extract content for an academic A0
                 problematic_vars = [
                     'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
                     'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
-                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE'
+                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE',
+                    'REQUESTS_PROXIES', 'REQUESTS_VERIFY', 'REQUESTS_CERT',
+                    'CURL_PROXY', 'CURL_VERIFY', 'CURL_CERT'
                 ]
                 
                 cleared_vars = []
@@ -411,6 +429,14 @@ Given the following research manuscript text, extract content for an academic A0
                         cleared_vars.append(var)
                         del os.environ[var]
                         print(f"🔧 Cleared environment variable: {var}")
+                
+                # Also clear any requests-related environment variables
+                for key in list(os.environ.keys()):
+                    if 'proxy' in key.lower() or 'cert' in key.lower() or 'verify' in key.lower():
+                        if key not in cleared_vars:
+                            cleared_vars.append(key)
+                            del os.environ[key]
+                            print(f"🔧 Cleared additional environment variable: {key}")
                 
                 try:
                     # Create client with minimal environment
@@ -426,6 +452,8 @@ Given the following research manuscript text, extract content for an academic A0
             except Exception as e:
                 print(f"❌ Error creating Anthropic client: {e}")
                 print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
+                print(f"🔧 Error type: {type(e)}")
+                print(f"🔧 Error args: {e.args}")
                 return None, f"Error creating Anthropic client: {e}"
             response = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
