@@ -9,7 +9,7 @@ import tempfile
 import shutil
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
 from werkzeug.utils import secure_filename
-import fitz  # PDF text extraction (PyMuPDF)
+import pdfplumber  # PDF text extraction
 import openai
 import anthropic
 from pptx import Presentation
@@ -258,16 +258,15 @@ def allowed_file(filename, extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
 def extract_text_from_pdf(file_path):
-    """Extract text from PDF file using PyMuPDF (fitz)."""
+    """Extract text from PDF file using pdfplumber."""
     try:
-        doc = fitz.open(file_path)
-        text = ""
-        for page in doc:
-            page_text = page.get_text()
-            if page_text:
-                text += page_text + "\n"
-        doc.close()
-        return text
+        with pdfplumber.open(file_path) as pdf:
+            text = ""
+            for page in pdf.pages:
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
+            return text
     except Exception as e:
         return f"Error extracting text from PDF: {e}"
 
