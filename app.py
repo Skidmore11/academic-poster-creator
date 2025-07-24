@@ -340,22 +340,41 @@ Given the following research manuscript text, extract content for an academic A0
             
             print(f"🔧 Creating OpenAI client...")
             try:
-                # Clear ALL proxy environment variables
+                # Create a completely clean environment for client creation
                 import os
-                proxy_vars = [k for k in os.environ if 'proxy' in k.lower()]
-                original_proxy_values = {k: os.environ[k] for k in proxy_vars}
-                for k in proxy_vars:
-                    del os.environ[k]
-                    print(f"🔧 Aggressively cleared proxy variable: {k}")
+                import copy
+                
+                # Save all current environment variables
+                original_env = copy.deepcopy(os.environ)
+                
+                # Clear ALL environment variables that might interfere
+                problematic_vars = [
+                    'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
+                    'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
+                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE'
+                ]
+                
+                cleared_vars = []
+                for var in problematic_vars:
+                    if var in os.environ:
+                        cleared_vars.append(var)
+                        del os.environ[var]
+                        print(f"🔧 Cleared environment variable: {var}")
+                
                 try:
+                    # Create client with minimal environment
                     client = openai.OpenAI(api_key=OPENAI_API_KEY)
                     print(f"✅ OpenAI client created successfully")
                 finally:
-                    for k, v in original_proxy_values.items():
-                        os.environ[k] = v
-                        print(f"🔧 Restored proxy variable: {k}")
+                    # Restore original environment
+                    for var in cleared_vars:
+                        if var in original_env:
+                            os.environ[var] = original_env[var]
+                            print(f"🔧 Restored environment variable: {var}")
+                        
             except Exception as e:
                 print(f"❌ Error creating OpenAI client: {e}")
+                print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
                 return None, f"Error creating OpenAI client: {e}"
             response = client.chat.completions.create(
                 model="gpt-4o",
@@ -366,29 +385,48 @@ Given the following research manuscript text, extract content for an academic A0
                 temperature=0.4
             )
             raw_content = response.choices[0].message.content
-        
+            
         elif provider == 'anthropic':
             if not ANTHROPIC_API_KEY:
                 return None, "Anthropic API key not configured"
             
             print(f"🔧 Creating Anthropic client...")
             try:
-                # Clear ALL proxy environment variables
+                # Create a completely clean environment for client creation
                 import os
-                proxy_vars = [k for k in os.environ if 'proxy' in k.lower()]
-                original_proxy_values = {k: os.environ[k] for k in proxy_vars}
-                for k in proxy_vars:
-                    del os.environ[k]
-                    print(f"🔧 Aggressively cleared proxy variable: {k}")
+                import copy
+                
+                # Save all current environment variables
+                original_env = copy.deepcopy(os.environ)
+                
+                # Clear ALL environment variables that might interfere
+                problematic_vars = [
+                    'HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy',
+                    'NO_PROXY', 'no_proxy', 'ALL_PROXY', 'all_proxy',
+                    'REQUESTS_CA_BUNDLE', 'CURL_CA_BUNDLE', 'SSL_CERT_FILE'
+                ]
+                
+                cleared_vars = []
+                for var in problematic_vars:
+                    if var in os.environ:
+                        cleared_vars.append(var)
+                        del os.environ[var]
+                        print(f"🔧 Cleared environment variable: {var}")
+                
                 try:
+                    # Create client with minimal environment
                     client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
                     print(f"✅ Anthropic client created successfully")
                 finally:
-                    for k, v in original_proxy_values.items():
-                        os.environ[k] = v
-                        print(f"🔧 Restored proxy variable: {k}")
+                    # Restore original environment
+                    for var in cleared_vars:
+                        if var in original_env:
+                            os.environ[var] = original_env[var]
+                            print(f"🔧 Restored environment variable: {var}")
+                        
             except Exception as e:
                 print(f"❌ Error creating Anthropic client: {e}")
+                print(f"🔧 Full error details: {type(e).__name__}: {str(e)}")
                 return None, f"Error creating Anthropic client: {e}"
             response = client.messages.create(
                 model="claude-3-5-sonnet-20241022",
@@ -400,7 +438,7 @@ Given the following research manuscript text, extract content for an academic A0
                 ]
             )
             raw_content = response.content[0].text
-        
+            
         else:
             return None, f"Unsupported API provider: {provider}"
         
