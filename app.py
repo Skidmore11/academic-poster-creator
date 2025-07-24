@@ -1929,6 +1929,8 @@ if __name__ == '__main__':
     
     print(f"🔧 Default API provider: {current_api_provider.upper()}")
     print(f"🔧 Anthropic version: {anthropic.__version__}")
+    print(f"🔧 Environment check - OpenAI key: {'✅ Set' if OPENAI_API_KEY else '❌ Missing'}")
+    print(f"🔧 Environment check - Anthropic key: {'✅ Set' if ANTHROPIC_API_KEY else '❌ Missing'}")
     
     # Clean up old files on startup if auto-cleanup is enabled
     if AUTO_CLEANUP_UPLOADS:
