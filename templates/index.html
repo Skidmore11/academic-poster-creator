@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Academic Poster Creator - AI-Powered Research Poster Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -11,8 +14,8 @@
     <style>
         /* Modern Design System */
         :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
+            --primary-color: #0079f2;
+            --primary-dark: #0056b3;
             --secondary-color: #7c3aed;
             --accent-color: #06b6d4;
             --success-color: #10b981;
@@ -2108,7 +2111,8 @@
             line-height: 1.5;
         }
 
-        .template-description .ideal-for {
+        .template-description .ideal-for,
+        .template-info .ideal-for {
             background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
             padding: 1.5rem;
             border-radius: 15px;
@@ -2117,7 +2121,8 @@
             box-shadow: 0 5px 15px rgba(79, 172, 254, 0.1);
         }
 
-        .template-description .ideal-for strong {
+        .template-description .ideal-for strong,
+        .template-info .ideal-for strong {
             color: #4facfe;
             font-weight: 700;
         }
@@ -2140,6 +2145,8 @@
             transform: translateY(-3px);
             box-shadow: 0 15px 35px rgba(79, 172, 254, 0.4);
         }
+
+
 
         /* Landing Page Styles */
         .landing-page {
@@ -2600,7 +2607,7 @@
             <!-- Alpha Banner with Logo -->
         <div class="alpha-banner">
             <a href="/" class="logo-link">
-                <img src="/static/PosterFormBlackLogo.png" alt="PosterForm Logo" class="alpha-logo">
+                <img src="/static/PPLogoBlack.svg" alt="PosterPro.io Logo" class="alpha-logo">
             </a>
             <span class="alpha-banner-text">🚧 This tool is in Alpha – features are being actively developed and you may experience some errors.</span>
         </div>
@@ -2611,7 +2618,7 @@
         <section class="landing-hero">
             <div class="hero-content">
                 <div class="hero-logo">
-                    <img src="/static/PosterFormWhiteLogo.png" alt="PosterForm Logo" class="hero-logo-image">
+                    <img src="/static/PPLogoWhite.svg" alt="PosterPro.io Logo" class="hero-logo-image">
                 </div>
                 
                 <h1 class="hero-title">
@@ -2805,12 +2812,12 @@
                 <div class="faq-list">
                     <div class="faq-item">
                         <div class="faq-question" onclick="toggleFAQ(this)">
-                            <span>What is PosterForm.ai?</span>
+                            <span>What is PosterPro.io?</span>
                             <div class="faq-icon">+</div>
                         </div>
                         <div class="faq-answer">
                             <div class="faq-answer-content">
-                                PosterForm.ai helps researchers quickly turn their academic papers into editable, professional research posters. You upload your PDF, choose a template, and the AI extracts and formats your content into a PowerPoint file you can tweak and present.
+                                PosterPro.io helps researchers quickly turn their academic papers into editable, professional research posters. You upload your PDF, choose a template, and the AI extracts and formats your content into a PowerPoint file you can tweak and present.
                             </div>
                         </div>
                     </div>
@@ -2926,31 +2933,8 @@
             Back to Home
         </a>
 
-        <!-- Hero Section for Poster Creation -->
-        <section class="landing-hero" style="min-height: 60vh; padding: 4rem 2rem;">
-            <div class="hero-content">
-                <div class="hero-logo" style="margin-bottom: 1rem;">
-                    <img src="/static/PosterFormWhiteLogo.png" alt="PosterForm Logo" class="hero-logo-image" style="height: 80px;">
-                </div>
-                
-                <h1 class="hero-title" style="font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 1rem;">
-                    <i class="fas fa-magic me-3"></i>
-                    Create Your Academic Poster
-                </h1>
-                
-                <p class="hero-subtitle" style="font-size: 1.1rem; margin-bottom: 2rem;">
-                    Upload your research PDF and let our AI transform it into a professional academic poster in minutes
-                </p>
-                
-                <div class="hero-badge" style="margin-bottom: 2rem;">
-                    <i class="fas fa-rocket"></i>
-                    AI-Powered • Professional Templates • Instant Download
-                </div>
-            </div>
-        </section>
-
         <!-- Main Content -->
-        <div class="main-container" style="margin-top: -4rem; position: relative; z-index: 10;">
+        <div class="main-container" style="margin-top: 2rem; position: relative; z-index: 10;">
             <div class="content-card" style="border-radius: 32px; box-shadow: var(--shadow-xl);">
             
             <div class="content-body" style="padding: 2rem;">
@@ -3291,7 +3275,7 @@
                         </div>
                     </div>
                     <div class="col-lg-4">
-                        <div class="template-description" id="templateDescription">
+                        <div class="template-info" id="templateInfo">
                             <div class="text-center">
                                 <div class="spinner-border text-primary" role="status">
                                     <span class="visually-hidden">Loading...</span>
@@ -3299,6 +3283,14 @@
                                 <p class="mt-2 text-muted">Loading template details...</p>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div class="template-description mt-4" id="templateDescription">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Loading template details...</p>
                     </div>
                 </div>
                 <div class="preview-actions">
@@ -3330,8 +3322,9 @@
                     <a href="#" id="downloadLink" class="btn btn-process">
                         <i class="fas fa-download me-2"></i>Download Poster
                     </a>
-                    <button class="btn btn-outline-secondary ms-2" onclick="createAnother()">
-                        <i class="fas fa-plus me-2"></i>Create Another
+                    <button onclick="finishAndOpenSurvey()" 
+                            class="btn btn-outline-secondary ms-2">
+                        <i class="fas fa-clipboard-list me-2"></i>Finish and Provide Feedback
                     </button>
                 </div>
             </div>
@@ -3340,7 +3333,10 @@
 
 
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?v=20250724"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js?v=20250725"></script>
+    <!-- Cache busting timestamp: 2025-01-27 15:30:00 -->
     <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js?v=1"></script>
     <script>
         // Set PDF.js worker path
@@ -3351,6 +3347,19 @@
         let selectedTemplateFilename = 'default';
         let currentStep = 0;
         const totalSteps = 5;
+        
+        // Force reload function to bypass cache
+        function forceReload() {
+            window.location.reload(true);
+        }
+        
+        // Add keyboard shortcut to force reload (Ctrl+Shift+F)
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.shiftKey && e.key === 'F') {
+                e.preventDefault();
+                forceReload();
+            }
+        });
         
         // Emergency scroll restoration function
         function forceRestoreScrolling() {
@@ -3379,13 +3388,109 @@
             if (e.ctrlKey && e.shiftKey && e.key === 'R') {
                 e.preventDefault();
                 forceRestoreScrolling();
-                alert('Scrolling has been restored!');
             }
         });
 
         // Modal functions
         function closeResultsModal() {
             document.getElementById('resultsModal').style.display = 'none';
+        }
+
+        function closeSurveyModal() {
+            document.getElementById('surveyModal').style.display = 'none';
+        }
+
+        // Finish and provide feedback
+        function finishAndProvideFeedback() {
+            console.log('finishAndProvideFeedback called');
+            // Close the results modal
+            closeResultsModal();
+            
+            // Check if user has already completed or skipped survey
+            const surveyCompleted = localStorage.getItem('surveyCompleted');
+            const surveySkipped = localStorage.getItem('surveySkipped');
+            
+            console.log('Survey completed:', surveyCompleted);
+            console.log('Survey skipped:', surveySkipped);
+            
+            // Show survey modal (unless already completed/skipped)
+            if (!surveyCompleted && !surveySkipped) {
+                console.log('Showing survey modal');
+                showSurveyModal();
+            } else {
+                console.log('Going to landing page');
+                // If they've already done the survey, just go back to landing page
+                showLandingPage();
+            }
+        }
+
+        // Show survey modal
+        function showSurveyModal() {
+            console.log('showSurveyModal called');
+            const surveyModal = document.getElementById('surveyModal');
+            if (surveyModal) {
+                console.log('Survey modal found, showing it');
+                surveyModal.style.display = 'flex';
+                console.log('Modal display style set to:', surveyModal.style.display);
+            } else {
+                console.error('Survey modal not found!');
+                // Try to find any modal elements
+                const allModals = document.querySelectorAll('.modal-overlay');
+                console.log('Found modal elements:', allModals.length);
+                allModals.forEach((modal, index) => {
+                    console.log(`Modal ${index}:`, modal.id, modal.style.display);
+                });
+            }
+        }
+
+        // Skip survey
+        function skipSurvey() {
+            closeSurveyModal();
+            // Set a flag to remember user skipped
+            localStorage.setItem('surveySkipped', 'true');
+            // Go back to landing page
+            showLandingPage();
+        }
+
+        // Mark survey as completed
+        function completeSurvey() {
+            closeSurveyModal();
+            // Set a flag to remember user completed the survey
+            localStorage.setItem('surveyCompleted', 'true');
+            // Remove skip flag if it exists
+            localStorage.removeItem('surveySkipped');
+            // Go back to landing page
+            showLandingPage();
+        }
+
+        // Skip feedback (new function)
+        function skipFeedback() {
+            console.log('skipFeedback called');
+            // Close the results modal
+            closeResultsModal();
+            // Set a flag to remember user skipped
+            localStorage.setItem('surveySkipped', 'true');
+            // Go back to landing page
+            showLandingPage();
+        }
+
+        // Show landing page (helper function)
+        function showLandingPage() {
+            // Hide any modals
+            closeResultsModal();
+            closeSurveyModal();
+            // Refresh the page to show landing page
+            window.location.reload();
+        }
+
+        // Finish and open survey in new window
+        function finishAndOpenSurvey() {
+            // Open survey in new window
+            window.open('https://www.surveymonkey.com/r/SXVD6QS', '_blank');
+            // Close the results modal
+            closeResultsModal();
+            // Refresh the page to show landing page
+            window.location.reload();
         }
 
         function startOver() {
@@ -3787,7 +3892,7 @@
         function joinWaitlist() {
             // For now, redirect to the poster creation page as a fallback
             // In a real implementation, this would open a waitlist signup form
-            alert('Thank you for your interest! We\'ll be launching soon. For now, you can try the tool by clicking "Get Early Access".');
+
             showPosterCreation();
         }
 
@@ -4644,8 +4749,9 @@
                 <a href="/download/${filename}" class="btn btn-process">
                     <i class="fas fa-download me-2"></i>Download Poster (PowerPoint)
                 </a>
-                <button class="btn btn-outline-secondary ms-2 mt-3" onclick="startOver()">
-                    <i class="fas fa-undo me-2"></i>Start Over
+                <button onclick="finishAndOpenSurvey()" 
+                        class="btn btn-outline-secondary ms-2 mt-3">
+                    <i class="fas fa-clipboard-list me-2"></i>Finish and Provide Feedback
                 </button>
             `;
             
@@ -4653,7 +4759,7 @@
             loadingContent.appendChild(downloadBtnContainer);
             
             // Keep the modal open for a bit longer so users can see the download options
-            // The modal will stay visible until user clicks "Start Over" or downloads
+            // The modal will stay visible until user clicks "Finish and Provide Feedback" or downloads
         }
 
         function showResults(data) {
@@ -4733,10 +4839,15 @@
             } else {
                 // Show default message for the default template
                 document.getElementById('previewTemplateTitle').innerHTML = '<i class="fas fa-eye"></i>Default Template Preview';
-                document.getElementById('templateDescription').innerHTML = `
+                document.getElementById('templateInfo').innerHTML = `
                     <h6><i class="fas fa-star"></i>Default Template</h6>
                     <p>A clean, professional template with a modern blue color scheme that works perfectly for any type of presentation.</p>
                     
+                    <div class="ideal-for">
+                        <strong>Perfect for:</strong> Professional presentations, research showcases, and general business use.
+                    </div>
+                `;
+                document.getElementById('templateDescription').innerHTML = `
                     <h6><i class="fas fa-check-circle"></i>Choose this template if:</h6>
                     <ul>
                         <li>You want a simple, clean design</li>
@@ -4744,10 +4855,6 @@
                         <li>You need a template that works with any content</li>
                         <li>You want something professional but not flashy</li>
                     </ul>
-                    
-                    <div class="ideal-for">
-                        <strong>Perfect for:</strong> Professional presentations, research showcases, and general business use.
-                    </div>
                 `;
             }
         }
@@ -4765,25 +4872,36 @@
                 .then(data => {
                     if (data.success && data.description) {
                         const desc = data.description;
-                        document.getElementById('templateDescription').innerHTML = `
+                        
+                        // Template info (right side) - name, description, and ideal for
+                        document.getElementById('templateInfo').innerHTML = `
                             <h6><i class="fas fa-palette"></i>${desc.title}</h6>
                             <p>${desc.description}</p>
-                            
-                            <h6><i class="fas fa-check-circle"></i>Choose this template if:</h6>
-                            <ul>
-                                ${desc.choose_if.map(item => `<li>${item}</li>`).join('')}
-                            </ul>
                             
                             <div class="ideal-for">
                                 <strong>Ideal for:</strong> ${desc.ideal_for}
                             </div>
                         `;
+                        
+                        // Template description (below) - choose this template if
+                        document.getElementById('templateDescription').innerHTML = `
+                            <h6><i class="fas fa-check-circle"></i>Choose this template if:</h6>
+                            <ul>
+                                ${desc.choose_if.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        `;
                     } else {
                         // Fallback if no description found
-                        document.getElementById('templateDescription').innerHTML = `
+                        document.getElementById('templateInfo').innerHTML = `
                             <h6><i class="fas fa-file-powerpoint"></i>${templateName}</h6>
                             <p>A professional template designed for your presentation needs with modern styling and clean layout.</p>
                             
+                            <div class="ideal-for">
+                                <strong>Perfect for:</strong> Professional presentations and business showcases.
+                            </div>
+                        `;
+                        
+                        document.getElementById('templateDescription').innerHTML = `
                             <h6><i class="fas fa-check-circle"></i>Features:</h6>
                             <ul>
                                 <li>Professional design</li>
@@ -4791,19 +4909,21 @@
                                 <li>Modern styling</li>
                                 <li>Easy to customize</li>
                             </ul>
-                            
-                            <div class="ideal-for">
-                                <strong>Perfect for:</strong> Professional presentations and business showcases.
-                            </div>
                         `;
                     }
                 })
                 .catch(error => {
                     console.error('Error loading template description:', error);
-                    document.getElementById('templateDescription').innerHTML = `
+                    document.getElementById('templateInfo').innerHTML = `
                         <h6><i class="fas fa-file-powerpoint"></i>${templateName}</h6>
                         <p>A professional template designed for your presentation needs with modern styling and clean layout.</p>
                         
+                        <div class="ideal-for">
+                            <strong>Perfect for:</strong> Professional presentations and business showcases.
+                        </div>
+                    `;
+                    
+                    document.getElementById('templateDescription').innerHTML = `
                         <h6><i class="fas fa-check-circle"></i>Features:</h6>
                         <ul>
                             <li>Professional design</li>
@@ -4811,10 +4931,6 @@
                             <li>Modern styling</li>
                             <li>Easy to customize</li>
                         </ul>
-                        
-                        <div class="ideal-for">
-                            <strong>Perfect for:</strong> Professional presentations and business showcases.
-                        </div>
                     `;
                 });
         }
@@ -4823,8 +4939,8 @@
             document.getElementById('previewModal').style.display = 'none';
             previewedTemplateFilename = null;
             
-            // Reset the description to loading state
-            document.getElementById('templateDescription').innerHTML = `
+            // Reset both sections to loading state
+            const loadingHTML = `
                 <div class="text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -4832,6 +4948,9 @@
                     <p class="mt-2 text-muted">Loading template details...</p>
                 </div>
             `;
+            
+            document.getElementById('templateInfo').innerHTML = loadingHTML;
+            document.getElementById('templateDescription').innerHTML = loadingHTML;
         }
 
         function selectTemplateFromPreview() {
@@ -5095,6 +5214,10 @@
                 closeFullSizeImage();
             }
         });
+
+
+
+
 
 
     </script>

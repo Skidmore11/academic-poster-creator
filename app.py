@@ -7,7 +7,7 @@ A modern web app to upload PDFs, extract information using AI, and create academ
 import os
 import tempfile
 import shutil
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify, send_from_directory
 from werkzeug.utils import secure_filename
 import PyPDF2  # PDF text extraction
 import openai
@@ -23,6 +23,9 @@ import random
 from dotenv import load_dotenv
 from pptx.enum.shapes import MSO_SHAPE_TYPE
 import template_configs
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Load environment variables from .env file
 load_dotenv()
@@ -858,19 +861,23 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
                             default_rgb = (255,255,255)  # White
                             insert_colored_headline(shape, content, highlight_rgb, default_rgb, font_family, font_size, font_bold, align_val)
                         else:
-                            # fallback: treat as title
+                            # Use template-specific headline settings for all templates
+                            settings = template_configs.get_font_settings(template_name_without_ext, "headline") if is_special_template else None
                             font_size = get_title_font_size(content, template_name_without_ext if is_special_template else None)
-                            settings = template_configs.get_font_settings(template_name_without_ext, "title") if is_special_template else None
+                            font_family = settings.get("font_family", "Futura") if settings else "Futura"
+                            font_bold = settings.get("bold", True) if settings else True
+                            alignment = settings.get("alignment", "center") if settings else "center"
+                            
+                            from pptx.util import Pt
+                            from pptx.enum.text import PP_ALIGN
+                            align_map = {"center": PP_ALIGN.CENTER, "left": PP_ALIGN.LEFT, "right": PP_ALIGN.RIGHT}
+                            align_val = align_map.get(alignment, PP_ALIGN.CENTER)
+                            
                             for paragraph in shape.text_frame.paragraphs:
-                                if settings and settings.get("alignment"):
-                                    alignment_constant = template_configs.get_alignment_constant(settings["alignment"])
-                                    paragraph.alignment = alignment_constant
-                                else:
-                                    paragraph.alignment = PP_ALIGN.CENTER
+                                paragraph.alignment = align_val
                                 for run in paragraph.runs:
                                     run.font.size = font_size
-                                    run.font.bold = True
-                                    font_family = settings.get("font_family", "Futura") if settings else "Futura"
+                                    run.font.bold = font_bold
                                     run.font.name = font_family
                                     if settings and settings.get("font_color"):
                                         rgb_color = template_configs.hex_to_rgb(settings["font_color"])
@@ -1052,27 +1059,52 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
         
         # Insert up to 4 figures if provided
         if figure_paths:
+            print(f"[DEBUG] Figure paths provided: {figure_paths}")
+            
+            # Debug: List ALL shapes on the slide first
+            print(f"[DEBUG] ALL shapes on slide:")
+            for shape in slide.shapes:
+                if hasattr(shape, 'name') and shape.name:
+                    print(f"[DEBUG]   - {shape.name}")
+            
             for i, fig_path in enumerate(figure_paths):
                 if fig_path:
                     print(f"[DEBUG] Processing Figure {i+1}: {fig_path}")
                     
                     # Determine placeholder name based on figure number
-                    # Figures 1-2: Large placeholders, Figures 3-4: Small placeholders
-                    if i < 2:  # Figures 1 and 2
-                        placeholder_name = f'Fig{i+1}PlaceholderLarge'
-                    else:  # Figures 3, 4
-                        placeholder_name = f'Fig{i+1}PlaceholderSmall'
+                    placeholder_name = f'Fig{i+1}Placeholder'
+                    print(f"[DEBUG] Looking for placeholder: {placeholder_name}")
                     
                     fig_shape = find_shape_in_groups(slide, placeholder_name)
                     if fig_shape:
-                        print(f"[DEBUG] Found placeholder: {placeholder_name}")
+                        print(f"[DEBUG] ✅ Found placeholder: {placeholder_name}")
                         
                         # Use the safe image insertion function
                         success, error = insert_image_safely(slide, fig_path, fig_shape, placeholder_name)
                         if not success:
                             print(f"[WARNING] Failed to insert image {i+1}: {error}")
+                        else:
+                            print(f"[DEBUG] ✅ Successfully inserted image {i+1}")
                     else:
-                        print(f"[DEBUG] Placeholder {placeholder_name} NOT found on slide.")
+                        print(f"[DEBUG] ❌ Placeholder {placeholder_name} NOT found on slide.")
+                        # Try alternative placeholder names
+                        alt_names = [f'Figure{i+1}Placeholder', f'Fig{i+1}PlaceholderLarge', f'Fig{i+1}PlaceholderSmall']
+                        for alt_name in alt_names:
+                            alt_shape = find_shape_in_groups(slide, alt_name)
+                            if alt_shape:
+                                print(f"[DEBUG] ✅ Found alternative placeholder: {alt_name}")
+                                success, error = insert_image_safely(slide, fig_path, alt_shape, alt_name)
+                                if success:
+                                    print(f"[DEBUG] ✅ Successfully inserted image {i+1} using {alt_name}")
+                                    break
+                                else:
+                                    print(f"[WARNING] Failed to insert image {i+1} using {alt_name}: {error}")
+                            else:
+                                print(f"[DEBUG] ❌ Alternative placeholder {alt_name} also NOT found")
+                else:
+                    print(f"[DEBUG] Figure {i+1} path is None or empty")
+        else:
+            print(f"[DEBUG] No figure paths provided")
         
         # Handle figure descriptions if provided
         if figure_descriptions:
@@ -1091,6 +1123,15 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
                             desc_box_name = f'FigureDesc{i}'
                             
                             desc_shape = find_shape_in_groups(slide, desc_box_name)
+                            if not desc_shape:
+                                # Try alternative description box names
+                                alt_desc_names = [f'FigDesc{i}', f'Figure{i}Desc', f'Fig{i}Desc']
+                                for alt_desc_name in alt_desc_names:
+                                    desc_shape = find_shape_in_groups(slide, alt_desc_name)
+                                    if desc_shape:
+                                        print(f"[DEBUG] Found alternative description box: {alt_desc_name}")
+                                        break
+                            
                             if desc_shape and desc_shape.has_text_frame:
                                 # Clear existing text
                                 desc_shape.text = ""
@@ -1104,10 +1145,11 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
                                     # Get font settings for figure descriptions
                                     settings = template_configs.get_font_settings(template_name_without_ext, "FigureDesc")
                                     if settings:
-                                        print(f"[DEBUG] Applying FigureDesc settings for {template_name_without_ext}: {settings}")
-                                        print(f"[DEBUG] Font family: {settings.get('font_family', 'Not set')}")
-                                        print(f"[DEBUG] Font size: {settings.get('font_size', 'Not set')}")
-                                        print(f"[DEBUG] Font color: {settings.get('font_color', 'Not set')}")
+                                        # Get main body text size for figure descriptions
+                                        font_size_pt = get_fixed_font_size(template_name_without_ext, "main_body_text")
+                                        font_size = font_size_pt.pt  # Extract the point value
+                                        
+                                        print(f"[DEBUG] FigureDesc settings: font={settings.get('font_family', 'Not set')}, size={font_size}pt, color={settings.get('font_color', 'Not set')}")
                                         
                                         # Create separate text runs for prefix (bold) and description (normal)
                                         paragraph = desc_shape.text_frame.paragraphs[0]
@@ -1123,7 +1165,7 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
                                         prefix_run = paragraph.add_run()
                                         prefix_run.text = f"Figure {i}: "
                                         font_family = settings.get("font_family", "Futura")
-                                        font_size = settings.get("font_size", 18)
+                                        
                                         prefix_run.font.name = font_family
                                         from pptx.util import Pt
                                         prefix_run.font.size = Pt(font_size)
@@ -1177,6 +1219,16 @@ def index():
     """Main page with upload form."""
     return render_template('index.html')
 
+@app.route('/landing_page.html')
+def landing_page():
+    """Landing page for email capture."""
+    return render_template('landing_page.html')
+
+@app.route('/template_library/<path:filename>')
+def serve_template_library(filename):
+    """Serve files from the template_library directory."""
+    return send_from_directory('template_library', filename)
+
 @app.route('/test')
 def test():
     """Simple test page for debugging."""
@@ -1193,7 +1245,7 @@ def upload_files():
         
         # Check if request is too large before processing
         if request.content_length and request.content_length > app.config['MAX_CONTENT_LENGTH']:
-            print(f"[ERROR] Request too large: {request.content_length // (1024*1024)}MB > {app.config["MAX_CONTENT_LENGTH"] // (1024*1024)}MB")
+            print(f"[ERROR] Request too large: {request.content_length // (1024*1024)}MB > {app.config['MAX_CONTENT_LENGTH'] // (1024*1024)}MB")
             return jsonify({
                 'error': 'Total upload size too large',
                 'message': f'Your upload is {request.content_length // (1024*1024)}MB, but the limit is {app.config["MAX_CONTENT_LENGTH"] // (1024*1024)}MB. Please reduce file sizes.',
@@ -2011,6 +2063,84 @@ def cleanup_status():
     except Exception as e:
         return jsonify({'error': f'Could not get cleanup status: {e}'}), 500
 
+def send_signup_notification(name, email):
+    """Send email notification when someone signs up."""
+    try:
+        # Get email settings from environment
+        sender_email = os.getenv('GMAIL_EMAIL')
+        sender_password = os.getenv('GMAIL_APP_PASSWORD')  # Gmail app password
+        admin_email = os.getenv('ADMIN_EMAIL')
+        
+        if not all([sender_email, sender_password, admin_email]):
+            return False, "Email configuration missing"
+        
+        # Create message
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = admin_email
+        msg['Subject'] = f"🎉 New PosterPro Signup: {name}"
+        
+        # Email body
+        body = f"""
+🎉 New PosterPro Signup!
+
+Name: {name}
+Email: {email}
+Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+IP Address: {request.remote_addr}
+User Agent: {request.headers.get('User-Agent', 'Unknown')}
+
+This person has joined your PosterPro waitlist!
+
+---
+Sent automatically from your PosterPro landing page.
+        """
+        
+        msg.attach(MIMEText(body, 'plain'))
+        
+        # Send email using Gmail SMTP
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        
+        return True, "Notification sent successfully"
+        
+    except Exception as e:
+        return False, f"Email error: {str(e)}"
+
+@app.route('/api/subscribe', methods=['POST'])
+def subscribe():
+    """Handle email subscription from landing page."""
+    try:
+        data = request.get_json()
+        name = data.get('name', '').strip()
+        email = data.get('email', '').strip()
+        
+        # Validation
+        if not name or not email:
+            return jsonify({'success': False, 'message': 'Name and email are required'}), 400
+        
+        # Send notification to admin
+        email_success, email_message = send_signup_notification(name, email)
+        
+        if email_success:
+            return jsonify({
+                'success': True, 
+                'message': 'Thank you! We\'ll notify you when we launch.'
+            })
+        else:
+            # Still return success to user, but log the email error
+            print(f"Email notification failed: {email_message}")
+            return jsonify({
+                'success': True, 
+                'message': 'Thank you! We\'ll notify you when we launch.'
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Server error occurred'}), 500
+
 if __name__ == '__main__':
     print("🚀 Starting Academic Poster Creator...")
     
@@ -2052,6 +2182,6 @@ if __name__ == '__main__':
         print(f"💡 Using {provider_names.get(current_api_provider, current_api_provider.upper())} API for intelligent information extraction!")
         print("🔑 Make sure your API keys are set in .env file")
     
-    # Use environment variable for debug mode (False in production)
-    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    # Use environment variable for debug mode (True in development)
+    debug_mode = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
     app.run(debug=debug_mode, host='0.0.0.0', port=port) 

@@ -1,0 +1,898 @@
+﻿<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>PosterPro.io - AI-Powered Academic Poster Creation</title>
+    <meta name='description' content='Transform your research into stunning academic posters with AI. Coming soon - be the first to know when we launch!'>
+    
+    <!-- Font Awesome -->
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css' rel='stylesheet'>
+    <!-- Google Fonts -->
+    <link href='https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap' rel='stylesheet'>
+    <!-- GSAP -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Observer.min.js'></script>
+    
+    <style>
+        :root {
+            --primary-purple: #8b5cf6;
+            --primary-pink: #ec4899;
+            --primary-blue: #3b82f6;
+            --dark-bg: #1e1b4b;
+            --darker-bg: #0f0f23;
+            --card-bg: #312e81;
+            --text-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --accent-teal: #14b8a6;
+            --gradient-purple-pink: linear-gradient(135deg, #0079f2 0%, #4da6ff 100%);
+            --gradient-blue-purple: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            min-height: 100vh;
+            background: var(--darker-bg);
+            border-radius: 20px;
+            margin: 20px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Left Section - Email Capture */
+        .email-section {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+        }
+
+        .logo-section {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-image {
+            width: 200px;
+            height: 200px;
+        }
+
+        .logo-text {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-white);
+        }
+
+        .email-content {
+            text-align: center;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .email-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-purple-pink);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .email-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .email-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            color: var(--text-white);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-gray);
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary-purple);
+            font-size: 1.1rem;
+        }
+
+        .submit-btn {
+            padding: 1rem;
+            background: var(--gradient-purple-pink);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .email-footer {
+            margin-top: 2rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Right Section - Welcome with Vertical Bars */
+        .welcome-section {
+            flex: 2;
+            background: var(--darker-bg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2rem 3rem;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-white);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-purple);
+        }
+
+        .signin-btn {
+            background: var(--gradient-blue-purple);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .signin-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .menu-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Vertical Gradient Bars */
+        .gradient-bars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .gradient-bar {
+            flex: 1;
+            background: linear-gradient(to bottom, 
+                rgba(59, 130, 246, 0.8) 0%, 
+                rgba(139, 92, 246, 0.6) 50%, 
+                rgba(236, 72, 153, 0.8) 100%);
+            margin: 0 2px;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .gradient-bar:hover {
+            transform: scaleY(1.05);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Template Sections within Bars */
+        .template-section {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            opacity: 0.9;
+            transition: all 0.3s ease;
+        }
+
+        .template-section:hover {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.1);
+        }
+
+        .template-1 { top: 15%; }
+        .template-2 { top: 35%; }
+        .template-3 { top: 55%; }
+        .template-4 { top: 75%; }
+
+        /* Welcome Content */
+        .welcome-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 10;
+            max-width: 600px;
+        }
+
+        .welcome-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.2rem;
+            color: var(--text-gray);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .signup-link {
+            color: var(--primary-purple);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Success/Error Messages */
+        .message {
+            display: none;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* Grid Motion Styles */
+        .grid-motion-wrapper {
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .grid-motion-wrapper::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 4;
+        }
+
+        .gridMotion-container {
+            gap: 1rem;
+            flex: none;
+            position: relative;
+            width: 150vw;
+            height: 150vh;
+            display: grid;
+            grid-template-rows: repeat(4, 1fr);
+            grid-template-columns: 100%;
+            transform: rotate(-15deg);
+            transform-origin: center center;
+            z-index: 2;
+        }
+
+        .row {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(7, 1fr);
+            will-change: transform, filter;
+        }
+
+        .row__item {
+            position: relative;
+        }
+
+        .row__item-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+            background-color: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .row__item-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background-position: 50% 50%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .row__item-content {
+            padding: 1rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .fullview {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .fullview .row__item-inner {
+            border-radius: 0px;
+        }
+
+        /* Welcome Overlay */
+        .welcome-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 15;
+            background: rgba(15, 15, 35, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .welcome-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--text-white);
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .welcome-subtitle {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .signup-link {
+            color: #8b5cf6;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .signup-link:hover {
+            color: #a855f7;
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                margin: 10px;
+            }
+
+            .navbar {
+                padding: 1rem;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .welcome-title {
+                font-size: 2.5rem;
+            }
+
+            .welcome-overlay {
+                padding: 2rem;
+                margin: 0 1rem;
+            }
+
+            .email-title {
+                font-size: 2rem;
+            }
+
+            .gridMotion-container {
+                width: 120vw;
+                height: 120vh;
+                transform: rotate(-10deg);
+            }
+
+            .row {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 0.5rem;
+            }
+
+            .gradient-bars {
+                flex-direction: column;
+            }
+
+            .gradient-bar {
+                margin: 2px 0;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gridMotion-container {
+                width: 100vw;
+                height: 100vh;
+                transform: rotate(-5deg);
+            }
+
+            .row {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class='main-container'>
+        <!-- Left Section - Email Capture -->
+        <div class='email-section'>
+            <div class='logo-section'>
+                <img src='/static/PPLogoWhite.svg' alt='PosterPro Logo' class='logo-image'>
+            </div>
+
+            <div class='email-content'>
+                <h1 class='email-title'>Try It Soon</h1>
+                <p class='email-subtitle'>
+                    Be the first to know when PosterPro.io launches and receive exclusive invitations to test our AI-powered academic poster creation tool.
+                </p>
+
+                <form class='email-form' id='emailForm'>
+                    <div class='form-group'>
+                        <i class='fas fa-user input-icon'></i>
+                        <input type='text' class='form-input' placeholder='Your Name' required>
+                    </div>
+                    
+                    <div class='form-group'>
+                        <i class='fas fa-envelope input-icon'></i>
+                        <input type='email' class='form-input' placeholder='Your Email Address' required>
+                    </div>
+
+                    <button type='submit' class='submit-btn'>
+                        <i class='fas fa-paper-plane me-2'></i> Keep Me Updated
+                    </button>
+                </form>
+
+                <div id='successMessage' class='message success'>
+                    <i class='fas fa-check-circle me-2'></i>Thank you! We'll notify you when we launch.
+                </div>
+                <div id='errorMessage' class='message error'>
+                    <i class='fas fa-exclamation-circle me-2'></i>Something went wrong. Please try again.
+                </div>
+
+                <div class='email-footer'>
+                    <p>Join our community of researchers and academics</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Section - Welcome with Vertical Bars -->
+        <div class='welcome-section'>
+
+
+            <!-- Grid Motion Background -->
+            <div class='grid-motion-wrapper' style='height: 100vh; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1;'>
+                <div class='gridMotion-container'>
+                    <div class='row' id='row-0'>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Cyan Flow Template_preview.png' alt='Cyan Flow Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Emerald Headline Template_preview.png' alt='Emerald Headline Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Headline Impact Template_preview.png' alt='Headline Impact Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Modular Impact_preview.png' alt='Modular Impact Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Personal Blue Basic_preview.png' alt='Personal Blue Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Bi-Simple Template_preview.png' alt='Bi-Simple Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Green Template_preview.png' alt='Green Template' class='row__item-img'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row' id='row-1'>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Grey Classic_preview.png' alt='Grey Classic Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Grounded Template_preview.png' alt='Grounded Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Modern Blue Template_preview.png' alt='Modern Blue Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Pastel Template_preview.png' alt='Pastel Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Playful Template_preview.png' alt='Playful Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Playground Template_preview.png' alt='Playground Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Space 3D Template_preview.png' alt='Space 3D Template' class='row__item-img'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row' id='row-2'>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Cyan Flow Template_preview.png' alt='Cyan Flow Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Emerald Headline Template_preview.png' alt='Emerald Headline Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Headline Impact Template_preview.png' alt='Headline Impact Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Modular Impact_preview.png' alt='Modular Impact Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/available/Personal Blue Basic_preview.png' alt='Personal Blue Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Bi-Simple Template_preview.png' alt='Bi-Simple Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Green Template_preview.png' alt='Green Template' class='row__item-img'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='row' id='row-3'>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Grey Classic_preview.png' alt='Grey Classic Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Grounded Template_preview.png' alt='Grounded Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Modern Blue Template_preview.png' alt='Modern Blue Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Pastel Template_preview.png' alt='Pastel Template' class='row__item-img'>
+                            </div>
+                        </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Playful Template_preview.png' alt='Playful Template' class='row__item-img'>
+                </div>
+                </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Playground Template_preview.png' alt='Playground Template' class='row__item-img'>
+                </div>
+                </div>
+                        <div class='row__item'>
+                            <div class='row__item-inner'>
+                                <img src='/template_library/coming_soon/Space 3D Template_preview.png' alt='Space 3D Template' class='row__item-img'>
+                </div>
+                </div>
+                </div>
+                </div>
+                <div class='fullview'></div>
+            </div>
+
+            <!-- Welcome Text Overlay -->
+            <div class='welcome-overlay'>
+                <h1 class='welcome-title'>Welcome to PosterPro</h1>
+                <p class='welcome-subtitle'>
+                    Built for researchers who want to share smarter.<br>
+                    <br>
+                    <strong>PosterPro</strong> uses AI to transform your manuscript into a stunning, conference-ready poster.<br>
+                    One upload. Clean layouts. Less stress. More science.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Email form handling
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = e.target.querySelector('input[type="text"]').value;
+            const email = e.target.querySelector('input[type="email"]').value;
+            
+            // Hide any existing messages
+            document.getElementById('successMessage').style.display = 'none';
+            document.getElementById('errorMessage').style.display = 'none';
+            
+            // Simple validation
+            if (!name || !email) {
+                showError('Please fill in all fields');
+                return;
+            }
+            
+            if (!isValidEmail(email)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Subscribing...';
+            submitBtn.disabled = true;
+            
+            // Send to server
+            fetch('/api/subscribe', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name, email })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showSuccess(data.message);
+            e.target.reset();
+                } else {
+                    showError(data.message);
+                }
+            })
+            .catch(error => {
+                showError('Network error. Please try again.');
+            })
+            .finally(() => {
+                // Reset button
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message || "Thank you! We'll notify you when we launch.";
+            successMessage.style.display = 'block';
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showEmailForm() {
+            // Scroll to email section
+            document.querySelector('.email-section').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+        }
+
+        // Grid Motion Animation
+        function initGridMotion() {
+            gsap.ticker.lagSmoothing(0);
+
+            const rowRefs = [];
+            const mouseXRef = { current: window.innerWidth / 2 };
+
+            // Get all rows
+            for (let i = 0; i < 4; i++) {
+                const row = document.getElementById(`row-${i}`);
+                if (row) rowRefs.push(row);
+            }
+
+            const handleMouseMove = (e) => {
+                mouseXRef.current = e.clientX;
+            };
+
+            const updateMotion = () => {
+                const maxMoveAmount = 300;
+                const baseDuration = 0.8;
+                const inertiaFactors = [0.6, 0.4, 0.3, 0.2];
+
+                rowRefs.forEach((row, index) => {
+                    if (row) {
+                        const direction = index % 2 === 0 ? 1 : -1;
+                        const moveAmount = ((mouseXRef.current / window.innerWidth) * maxMoveAmount - maxMoveAmount / 2) * direction;
+
+                        gsap.to(row, {
+                            x: moveAmount,
+                            duration: baseDuration + inertiaFactors[index % inertiaFactors.length],
+                            ease: 'power3.out',
+                            overwrite: 'auto',
+                        });
+                    }
+                });
+            };
+
+            const removeAnimationLoop = gsap.ticker.add(updateMotion);
+
+            window.addEventListener('mousemove', handleMouseMove);
+
+            return () => {
+                window.removeEventListener('mousemove', handleMouseMove);
+                removeAnimationLoop();
+            };
+        }
+
+        // Initialize Grid Motion when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for GSAP to load
+            if (typeof gsap !== 'undefined') {
+                initGridMotion();
+            } else {
+                // Retry after a short delay
+                setTimeout(initGridMotion, 100);
+            }
+        });
+
+    </script>
+</body>
+</html>

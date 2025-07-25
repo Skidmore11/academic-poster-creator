@@ -4,6 +4,8 @@ Template Configuration System
 Defines font sizes and colors for specific templates.
 """
 
+from pptx.enum.text import PP_ALIGN
+
 # Premium template categorization
 PREMIUM_TEMPLATES = [
     "Playground Template"  # Currently the only premium template
@@ -83,6 +85,39 @@ TEMPLATE_DESCRIPTIONS = {
             "You prefer organized, systematic presentation"
         ],
         "ideal_for": "Process-based research, multi-phase studies, and research with clear sequential components."
+    },
+    "Cyan Flow Template": {
+        "title": "Cyan Flow Template",
+        "description": "A clean, modern layout featuring a central visual focal point alongside sections for flow, methods, and discussion. This design balances strong visual storytelling with clear research structure.",
+        "choose_if": [
+            "Your study includes a standout figure or visual element you want to highlight",
+            "You want to guide the viewer through a logical flow of your research process",
+            "You're presenting a methodology-driven or process-oriented project",
+            "You prefer a layout that feels visual but still professional"
+        ],
+        "ideal_for": "Qualitative studies, intervention development, visual frameworks, and research that benefits from a strong narrative arc."
+    },
+    "Modular Impact": {
+        "title": "Modular Impact Template",
+        "description": "A vibrant and well-structured double-column layout with numbered sections, clear typography, and strong use of colour to guide the reader. Visuals are neatly arranged alongside text, with a dedicated space for figures, future work, and references.",
+        "choose_if": [
+            "You want a straightforward, linear narrative from background to conclusion",
+            "Your poster includes multiple figures and you want them cleanly positioned",
+            "You need clear visual sectioning with standout numbering",
+            "You value a polished, conference-ready design with good hierarchy"
+        ],
+        "ideal_for": "Scientific posters with quantitative data, undergraduate or postgraduate project presentations, and any research requiring a clear, numbered progression."
+    },
+    "Emerald Headline Template": {
+        "title": "Emerald Headline Template",
+        "description": "A bold, modern layout with a high-impact headline space to draw immediate attention. This template balances graphic design with academic structure—featuring clear section headers, strong colour blocks, and a standout flowchart-style methods section.",
+        "choose_if": [
+            "You want to lead with a strong, engaging headline finding",
+            "You need to visualise a multi-stage process (e.g. intervention phases, timelines)",
+            "You’re aiming for a more contemporary, design-forward look",
+            "You want to keep content brief and visual"
+        ],
+        "ideal_for": "Digital health, implementation research, or applied studies with a clear call to action. Perfect for drawing attention in competitive poster halls or when trying to communicate one clear message."
     }
 }
 
@@ -477,6 +512,248 @@ TEMPLATE_CONFIGS = {
                 "extra_long": 11 # >250 characters
             }
         }
+    },
+    "Cyan Flow Template": {
+        "title": {
+            "font_color": "#05bbd6",  # Cyan text
+            "font_family": "Aptos",
+            "bold": True,
+            "alignment": "center"
+        },
+        "subtitle": {
+            "font_color": "#000000",  # Cyan text
+            "font_family": "Aptos",
+            "bold": False,
+            "alignment": "center"
+        },
+        "authors": {
+            "font_color": "#000000",
+            "font_family": "Aptos",
+            "bold": False,
+            "alignment": "center"
+        },
+        "affiliations": {
+            "font_color": "#000000",
+            "font_family": "Aptos",
+            "bold": False,
+            "alignment": "center"
+        },
+        "main_body_text": {  # Introduction, Methods, Results, etc.
+            "font_color": "#000000",  # Black text
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "references": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Aptos",
+            "bold": False,
+            "alignment": "left"
+        },
+        "FigureDesc": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Aptos",
+            "bold": False,
+            "alignment": "left"
+        },
+        "dynamic_font_sizes": {
+            "title": {
+                "short": 80,    # ≤80 characters
+                "medium": 72,   # 81-120 characters
+                "long": 60,     # >120 characters
+                "alignment": "center"
+            },
+            "subtitle": {
+                "ratio": 0.7,   # 70% of title size
+                "min_size": 28,  # Minimum size
+                "alignment": "center"
+            },
+            "authors": {
+                "short": 40,    # ≤80 characters
+                "medium": 36,   # 81-160 characters
+                "long": 32,     # >160 characters
+                "extra_long": 28, # >250 characters
+                "alignment": "center"
+            },
+            "affiliations": {
+                "short": 24,    # ≤80 characters
+                "medium": 24,   # 81-160 characters
+                "long": 20,     # >160 characters
+                "extra_long": 16 # >250 characters
+            },
+            "main_body": {
+                "short": 36    # Fixed size for main body text
+            },
+            "references": {
+                "short": 32,    # ≤80 characters
+                "medium": 28,   # 81-160 characters
+                "long": 128,     # >160 characters
+                "extra_long": 28 # >250 characters
+            }
+        }
+    },
+    "Modular Impact": {
+        "title": {
+            "font_color": "#FFFFFF",  # White text for dark backgrounds
+            "font_family": "Futura",
+            "bold": True,
+            "alignment": "center"
+        },
+        "subtitle": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "center"
+        },
+        "authors": {
+            "font_color": "#000000",
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "affiliations": {
+            "font_color": "#000000",
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "main_body_text": {  # Introduction, Methods, Results, etc.
+            "font_color": "#000000",  # Black text
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "references": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "FigureDesc": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Futura",
+            "bold": False,
+            "alignment": "left"
+        },
+        "dynamic_font_sizes": {
+            "title": {
+                "short": 56,    # ≤80 characters
+                "medium": 46,   # 81-120 characters
+                "long": 40,     # >120 characters
+                "alignment": "center"
+            },
+            "subtitle": {
+                "ratio": 0.65,  # 65% of title size
+                "min_size": 30,  # Minimum size
+                "alignment": "center"
+            },
+            "authors": {
+                "short": 22,    # ≤80 characters
+                "medium": 20,   # 81-160 characters
+                "long": 18,     # >160 characters
+                "extra_long": 16 # >250 characters
+            },
+            "affiliations": {
+                "short": 18,    # ≤80 characters
+                "medium": 16,   # 81-160 characters
+                "long": 14,     # >160 characters
+                "extra_long": 12 # >250 characters
+            },
+            "main_body": {
+                "short": 22    # Fixed size for main body text
+            },
+            "references": {
+                "short": 18,    # ≤80 characters
+                "medium": 16,   # 81-160 characters
+                "long": 14,     # >160 characters
+                "extra_long": 12 # >250 characters
+            }
+        }
+    },
+    "Emerald Headline Template": {
+        "title": {
+            "font_color": "#000000",  # White text for dark backgrounds
+            "font_family": "Poppins",
+            "bold": True,
+            "alignment": "left"
+        },
+        "subtitle": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Poppins",
+            "bold": False,
+            "alignment": "left"
+        },
+        "authors": {
+            "font_color": "#000000",
+            "font_family": "Poppins",
+            "bold": False,
+            "alignment": "left"
+        },
+        "affiliations": {
+            "font_color": "#000000",
+            "font_family": "Poppins",
+            "bold": False,
+            "italic": True,
+            "alignment": "left"
+        },
+        "main_body_text": {  # Introduction, Methods, Results, etc.
+            "font_color": "#000000",  # Black text
+            "font_family": "Poppins",
+            "bold": False,
+            "alignment": "left"
+        },
+        "references": {
+            "font_color": "#ffffff",  # Black text
+            "font_family": "Poppins",
+            "bold": False,
+            "alignment": "left"
+        },
+        "FigureDesc": {
+            "font_color": "#000000",  # Black text
+            "font_family": "Poppins",
+            "bold": False,
+            "alignment": "left"
+        },
+        "headline": {
+            "font_color": "#ffffff",  # White text for dark backgrounds
+            "font_family": "Poppins",
+            "bold": True,
+            "alignment": "left"
+        },
+        "dynamic_font_sizes": {
+            "title": {
+                "short": 100,    # ≤80 characters
+                "medium": 80,   # 81-120 characters
+                "long": 60,     # >120 characters
+                "alignment": "center"
+            },
+            "subtitle": {
+                "ratio": 0.68,  # 68% of title size
+                "min_size": 32,  # Minimum size
+                "alignment": "center"
+            },
+            "authors": {
+                "short": 44,    # ≤80 characters
+                "medium": 44,   # 81-160 characters
+                "long": 32,     # >160 characters
+                "extra_long": 28 # >250 characters
+            },
+            "affiliations": {
+                "short": 30,    # ≤80 characters
+                "medium": 24,   # 81-160 characters
+                "long": 20,     # >160 characters
+                "extra_long": 16 # >250 characters
+            },
+            "main_body": {
+                "short": 24    # Fixed size for main body text
+            },
+            "references": {
+                "short": 20,    # ≤80 characters
+                "medium": 20,   # 81-160 characters
+                "long": 20,     # >160 characters
+                "extra_long": 20 # >250 characters
+            }
+        }
     }
 }
 
@@ -731,8 +1008,7 @@ def get_default_font_settings(section_type):
             "font_color": "#000000",
             "font_family": "Futura",
             "bold": False,
-            "alignment": "left",
-            "font_size": 18
+            "alignment": "left"
         }
     }
     
@@ -749,7 +1025,6 @@ def get_alignment_constant(alignment_string):
     """
     Convert alignment string to PowerPoint alignment constant.
     """
-    from pptx.enum.text import PP_ALIGN
     alignment_map = {
         "left": PP_ALIGN.LEFT,
         "center": PP_ALIGN.CENTER,
