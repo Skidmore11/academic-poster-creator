@@ -1216,7 +1216,12 @@ def populate_powerpoint_template(extracted_data, template_path, output_file, fig
 
 @app.route('/')
 def index():
-    """Main page with upload form."""
+    """Main landing page for email capture."""
+    return render_template('landing_page.html')
+
+@app.route('/app')
+def app_page():
+    """Main application page with upload form."""
     return render_template('index.html')
 
 @app.route('/landing_page.html')
